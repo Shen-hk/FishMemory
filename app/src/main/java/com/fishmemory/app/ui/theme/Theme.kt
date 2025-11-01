@@ -10,33 +10,32 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-
+//拓展建议:自定义颜色  自定义字体
 private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFF1E88E5),
-    secondary = Color(0xFF03DAC6),
-    tertiary = Color(0xFF3700B3),
-    background = Color(0xFF121212),
-    surface = Color(0xFF1E1E1E),
-    onPrimary = Color.White,
-    onSecondary = Color.Black,
-    onBackground = Color.White,
-    onSurface = Color.White
+    primary = Color(0xFF1E88E5),      // 主色保持不变
+    secondary = Color(0xFF03DAC6),    // 次要色保持不变
+    tertiary = Color(0xFF3700B3),     // 第三色保持不变
+    background = Color(0xFF121212),   // 背景：深灰色
+    surface = Color(0xFF1E1E1E),      // 表面：稍亮的深灰
+    onPrimary = Color.White,          // 主色上的文字：白色
+    onSecondary = Color.Black,        // 次要色上的文字：黑色
+    onBackground = Color.White,       // 背景上的文字：白色
+    onSurface = Color.White           // 表面上的文字：白色
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF1E88E5),
-    secondary = Color(0xFF03DAC6),
-    tertiary = Color(0xFF3700B3),
-    background = Color(0xFFFFFFFF),
-    surface = Color(0xFFFFFFFF),
-    onPrimary = Color.White,
-    onSecondary = Color.Black,
-    onBackground = Color.Black,
-    onSurface = Color.Black
+    primary = Color(0xFF1E88E5),      // 主色：蓝色
+    secondary = Color(0xFF03DAC6),    // 次要色：青色
+    tertiary = Color(0xFF3700B3),     // 第三色：深蓝色
+    background = Color(0xFFFFFFFF),   // 背景：白色
+    surface = Color(0xFFFFFFFF),      // 表面：白色
+    onPrimary = Color.White,          // 主色上的文字：白色
+    onSecondary = Color.Black,        // 次要色上的文字：黑色
+    onBackground = Color.Black,       // 背景上的文字：黑色
+    onSurface = Color.Black           // 表面上的文字：黑色
 )
-
 private val FishMemoryTypography = Typography(
-    displayLarge = TextStyle(
+    displayLarge = TextStyle(                //显示文字
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
         fontSize = 57.sp
@@ -51,7 +50,7 @@ private val FishMemoryTypography = Typography(
         fontWeight = FontWeight.Normal,
         fontSize = 36.sp
     ),
-    headlineLarge = TextStyle(
+    headlineLarge = TextStyle(              //标题文字head
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Bold,
         fontSize = 32.sp
@@ -66,7 +65,7 @@ private val FishMemoryTypography = Typography(
         fontWeight = FontWeight.Bold,
         fontSize = 24.sp
     ),
-    titleLarge = TextStyle(
+    titleLarge = TextStyle(             //标题文字
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Bold,
         fontSize = 22.sp
@@ -81,7 +80,7 @@ private val FishMemoryTypography = Typography(
         fontWeight = FontWeight.Medium,
         fontSize = 14.sp
     ),
-    bodyLarge = TextStyle(
+    bodyLarge = TextStyle(                  //正文
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp
@@ -96,7 +95,7 @@ private val FishMemoryTypography = Typography(
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp
     ),
-    labelLarge = TextStyle(
+    labelLarge = TextStyle(                 //标签
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Medium,
         fontSize = 14.sp
@@ -115,14 +114,14 @@ private val FishMemoryTypography = Typography(
 
 @Composable
 fun FishMemoryTheme(
-    darkTheme: Boolean = false,
-    content: @Composable () -> Unit
+    darkTheme: Boolean = false,  // 深色模式开关pp
+    content: @Composable () -> Unit  // 主题内容
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
     MaterialTheme(
-        colorScheme = colorScheme,
-        typography = FishMemoryTypography,
-        content = content
+        colorScheme = colorScheme,      // 颜色方案
+        typography = FishMemoryTypography, // 文字排版
+        content = content               // 应用内容
     )
 }

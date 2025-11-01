@@ -15,5 +15,6 @@ data class ArticleData(
     val readTime: Int = 5,
     val likeCount: Int = 42,
     val commentCount: Int = 8,
-    val coverImage: String? = null
+    val coverImage: String? = null,
+    val isFavorite: Boolean = false  // 收藏状态
 )

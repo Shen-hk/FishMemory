@@ -72,6 +72,24 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class ArticleViewModel : ViewModel() {
+//待优化：搜索按钮功能
+
+    /*PullToRefreshBox (下拉刷新)
+     └── Scaffold (整体骨架)
+          ├── TopAppBar (顶部栏)
+          └── Content (内容区)
+                └── Surface (背景 surface)
+                    ├── 加载状态 (旋转动画)
+                    ├── 错误状态 (错误信息 + 重试按钮)
+                    └── 正常状态
+                        └── LazyColumn (滚动列表)
+                            ├── CategoryFilter (分类筛选)
+                            ├── SearchBar (搜索框)
+                            ├── 空状态提示 (可选)
+                            └── 文章列表 (多个ArticleItem)*/
+
+
+    //状态定义-------->状态公告板
     private val _articles = MutableStateFlow<List<ArticleData>>(emptyList())
     val articles: StateFlow<List<ArticleData>> = _articles
 
@@ -81,16 +99,16 @@ class ArticleViewModel : ViewModel() {
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
-    // 新增：搜索关键词
-    private val _searchQuery = MutableStateFlow("")
+    private val _searchQuery = MutableStateFlow("")          // 新增：搜索关键词
     val searchQuery: StateFlow<String> = _searchQuery
 
-    // 新增：当前分类
-    private val _currentCategory = MutableStateFlow("全部")
+    private val _currentCategory = MutableStateFlow("全部")           // 新增：当前分类
     val currentCategory: StateFlow<String> = _currentCategory
 
-    // 计算属性：过滤后的文章列表
+    // 计算属性：过滤后的文章列表    流水线->搜索过滤->分类过滤
     val filteredArticles: StateFlow<List<ArticleData>> =
+
+        //搜索过滤器
         _articles.combine(_searchQuery) { articles, query ->
             if (query.isBlank()) {
                 articles
@@ -101,16 +119,16 @@ class ArticleViewModel : ViewModel() {
                             article.tags.any { tag -> tag.contains(query, ignoreCase = true) }
                 }
             }
-        }.combine(_currentCategory) { articles, category ->
+        }.combine(_currentCategory) { articles, category ->     //分类过滤器
             if (category == "全部") {
                 articles
             } else {
                 articles.filter { it.category == category }
             }
         }.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            emptyList()
+            viewModelScope,//生命周期
+            SharingStarted.WhileSubscribed(5000),//规律
+            emptyList()//初始
         )
 
     init {
@@ -129,7 +147,7 @@ class ArticleViewModel : ViewModel() {
                         title = apiResponse.title,
                         body = apiResponse.body,
                         userId = apiResponse.userId,
-                        category = when (index % 4) {
+                        category = when (index % 4) {      //这里是循环分配分类属于自定义分类
                             0 -> "技术"
                             1 -> "前端"
                             2 -> "后端"
@@ -177,27 +195,27 @@ class ArticleViewModel : ViewModel() {
                     )
                 )
                 _articles.value = mockArticles
-            } finally {
+            } finally {//最后结束---？没有这个会怎么样 一直在刷新状态
                 _isLoading.value = false
             }
         }
     }
 
-    // 新增：设置搜索关键词
+    // 设置搜索关键词
     fun setSearchQuery(query: String) {
         _searchQuery.value = query
     }
 
-    // 新增：设置当前分类
+    // 设置当前分类
     fun setCurrentCategory(category: String) {
         _currentCategory.value = category
     }
 
-    // 新增：切换收藏状态
+    // 切换收藏状态
     fun toggleFavorite(articleId: Int) {
         val updatedArticles = _articles.value.map { article ->
             if (article.id == articleId) {
-                article.copy(isFavorite = !article.isFavorite)
+                article.copy(isFavorite = !article.isFavorite)//不可变数据的更新利用copy 保持了不可变性又符合响应式
             } else {
                 article
             }
@@ -242,7 +260,7 @@ fun ArticleListScreen(
                     actions = {
                         // 搜索按钮
                         IconButton(onClick = {
-                            // 这里可以打开搜索对话框或跳转到搜索页面
+                            // 这里可以打开搜索对话框或跳转到搜索页面还没设置呢
                         }) {
                             Icon(Icons.Default.Search, contentDescription = "搜索")
                         }
@@ -258,6 +276,8 @@ fun ArticleListScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
+
+                //error的不同状态
                 if (isLoading && articles.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -335,7 +355,7 @@ fun ArticleListScreen(
         }
     }
 }
-
+//卡片设置
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ArticleItem(
@@ -344,8 +364,7 @@ fun ArticleItem(
     onClick: () -> Unit = {}  // 添加点击参数
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(12.dp),
         onClick = onClick  // 设置点击事件

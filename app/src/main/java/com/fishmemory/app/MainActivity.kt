@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import com.fishmemory.app.ui.AppNavigation
 import com.fishmemory.app.ui.theme.FishMemoryTheme
 
-// MainActivity.kt 中
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,7 +19,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppNavigation()  // 使用导航组件
+                    AppNavigation()  // 使用导航组件显示第一个文章列表这个用于 多个界面时就要用导航
                 }
             }
         }

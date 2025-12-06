@@ -7,4 +7,28 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <!-- 主色调 -->
+    <color name="app_primary">#FF6750A4</color>
+    <color name="app_on_primary">#FFFFFFFF</color>
+    <color name="app_primary_container">#FFEADDFF</color>
+    <color name="app_on_primary_container">#FF21005D</color>
+
+    <!-- 辅助色 -->
+    <color name="app_secondary">#FF625B71</color>
+    <color name="app_on_secondary">#FFFFFFFF</color>
+    <color name="app_secondary_container">#FFE8DEF8</color>
+
+    <!-- 背景色 -->
+    <color name="app_background">#FFFFFBFE</color>
+    <color name="app_on_background">#FF1C1B1F</color>
+
+    <color name="gray">#666666</color>
+    <!-- 图标颜色 -->
+    <color name="icon_color">#666666</color>
+    <!-- 选中状态的图标颜色 -->
+    <color name="icon_color_selected">#FF6750A4</color> <!-- 蓝色 -->
+    <color name="rank_gold">#FFD700</color>
+    <color name="rank_silver">#C0C0C0</color>
+    <color name="rank_bronze">#CD7F32</color>
+    <color name="rank_normal">#9E9E9E</color>
 </resources>

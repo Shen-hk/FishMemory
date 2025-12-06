@@ -1,27 +1,22 @@
 package com.fishmemory.app
 
+import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
-import com.fishmemory.app.ui.AppNavigation
-import com.fishmemory.app.ui.theme.FishMemoryTheme
+import androidx.appcompat.app.AppCompatActivity
+import com.fishmemory.app.xml.activity.XmlMainActivity
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            FishMemoryTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    AppNavigation()  // 使用导航组件显示第一个文章列表这个用于 多个界面时就要用导航
-                }
-            }
-        }
+
+        // 开发阶段：直接启动XML版本（跳过选择器）
+        //val intent = Intent(this, XmlMainActivity::class.java)
+       // startActivity(intent)
+       // finish()
+
+        // 或者如果你想用选择器：
+        val intent = Intent(this, LauncherActivity::class.java)
+         startActivity(intent)
+        finish()
     }
 }

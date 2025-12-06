@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">FishMemory</string>
+    <string name="fishmemory_xml">FishMemory-XML版本</string>
 </resources>

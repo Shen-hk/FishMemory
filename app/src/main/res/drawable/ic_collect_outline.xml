@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 未收藏状态 - 空心五角星 -->
+    <item android:state_selected="false" android:state_pressed="false">
+        <vector android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+            <path android:strokeColor="#666666" android:strokeWidth="1.5" android:fillColor="#00000000"
+                android:pathData="M12,2 L14.5,8.5 L21.5,9 L16.5,13.5 L18,20.5 L12,17 L6,20.5 L7.5,13.5 L2.5,9 L9.5,8.5 Z"/>
+        </vector>
+    </item>
+
+    <!-- 按下状态 - 深色空心 -->
+    <item android:state_pressed="true">
+        <vector android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+            <path android:strokeColor="#333333" android:strokeWidth="1.5" android:fillColor="#00000000"
+                android:pathData="M12,2 L14.5,8.5 L21.5,9 L16.5,13.5 L18,20.5 L12,17 L6,20.5 L7.5,13.5 L2.5,9 L9.5,8.5 Z"/>
+        </vector>
+    </item>
+
+    <!-- 收藏状态 - 金色实心五角星 -->
+    <item android:state_selected="true">
+        <vector android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+            <path android:fillColor="#FFD700"
+                android:pathData="M12,2 L14.5,8.5 L21.5,9 L16.5,13.5 L18,20.5 L12,17 L6,20.5 L7.5,13.5 L2.5,9 L9.5,8.5 Z"/>
+        </vector>
+    </item>
+</selector>

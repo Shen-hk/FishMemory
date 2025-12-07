@@ -37,10 +37,6 @@
             android:exported="false"
             android:theme="@style/Theme.FishMemory"
             tools:ignore="Instantiatable" />
-        <!-- XML版本沸点详情页 -->
-        <activity
-            android:name=".xml.activity.HotRankingActivity"
-            android:exported="false" />
 
         <!-- 原有的MainActivity改为备用（可选） -->
         <activity

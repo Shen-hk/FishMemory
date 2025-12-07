@@ -1,0 +1,5 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/homeFragment" android:title="首页" android:icon="@drawable/ic_home" />
+    <item android:id="@+id/hotRankingFragment" android:title="沸点" android:icon="@drawable/ic_hot" />
+    <item android:id="@+id/myFragment" android:title="我" android:icon="@drawable/ic_profile" />
+</menu>

@@ -94,6 +94,9 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.recyclerview)
     implementation(libs.androidx.swiperefreshlayout)
+    implementation(libs.androidx.navigation.fragment)
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
 
 
     // Testing
@@ -111,4 +114,11 @@ dependencies {
     implementation("com.google.android.material:material:1.9.0")
 
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
+
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.fragment:fragment-ktx:1.6.2")
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")  // 最新稳定版
+    implementation("androidx.navigation:navigation-ui-ktx:2.7.7")       // 包含 setupWithNavController
 }

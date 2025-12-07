@@ -12,6 +12,7 @@ import com.fishmemory.app.shared.model.HotRankItem
 class HotRankAdapter : RecyclerView.Adapter<HotRankAdapter.ViewHolder>() {
 
     var dataList = listOf<HotRankItem>()
+        get() = field
         set(value) {
             field = value
             notifyDataSetChanged()

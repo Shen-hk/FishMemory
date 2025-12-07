@@ -8,15 +8,23 @@
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:elevation="0dp"
+        android:stateListAnimator="@null"
+        >
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:title="热点榜"
-            app:titleTextColor="@color/app_background"
-            android:background="@drawable/title_background" />
+            android:layout_height="75dp"
+            android:gravity="center"
+            android:paddingTop="30dp"
+            android:paddingBottom="0.1dp"
+            android:text="Hot-Rankinging..."
+            android:background="@drawable/title_background"
+            android:textColor="@color/app_on_primary"
+            android:textSize="32sp"
+            android:textStyle="bold" />
 
     </com.google.android.material.appbar.AppBarLayout>
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout

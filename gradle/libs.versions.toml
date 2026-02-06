@@ -1,5 +1,5 @@
 [versions]
-compileSdk = "35"
+compileSdk = "36"
 minSdk = "24"
 targetSdk = "35"
 
@@ -29,7 +29,19 @@ recyclerview = "1.4.0"
 swiperefreshlayout = "1.1.0"
 navigationFragment = "2.9.6"
 navigationFragmentKtx = "2.9.6"
-navigationUiKtx = "2.9.6"  # 新增
+navigationUiKtx = "2.9.6"
+compiler = "3.2.0-alpha11"  # 新增
+room = "2.6.1"
+kotlinCoroutines = "1.8.1"
+swiperefreshlayoutVersion = "1.2.0"
+lifecycleViewmodelKtx = "2.10.0"
+cameraCamera2Pipe = "1.6.0-beta01"
+filamentAndroid = "1.17.1"
+navigationFragmentKtxVersion = "2.9.7"
+navigationUiKtxVersion = "2.9.7"
+navigationRuntimeKtx = "2.9.7"
+webgpu = "1.0.0-alpha03"
+remoteCreationCore = "1.0.0-alpha03"
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
@@ -70,6 +82,20 @@ androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "s
 androidx-navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment", version.ref = "navigationFragment" }
 androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
 androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
+androidx-compiler = { group = "androidx.databinding", name = "compiler", version.ref = "compiler" }
+
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayoutVersion" }
+androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+androidx-camera-camera2-pipe = { group = "androidx.camera", name = "camera-camera2-pipe", version.ref = "cameraCamera2Pipe" }
+filament-android = { group = "com.google.ar.sceneform", name = "filament-android", version.ref = "filamentAndroid" }
+navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtxVersion" }
+navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtxVersion" }
+androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
+androidx-webgpu = { group = "androidx.webgpu", name = "webgpu", version.ref = "webgpu" }
+androidx-remote-creation-core = { group = "androidx.compose.remote", name = "remote-creation-core", version.ref = "remoteCreationCore" }
 
 [plugins]
 android-application = { id = "com.android.application", version = "8.13.0" }

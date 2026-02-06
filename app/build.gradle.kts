@@ -1,8 +1,11 @@
+import org.gradle.kotlin.dsl.implementation
 import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("kotlin-kapt")
+
 }
 
 android {
@@ -97,6 +100,16 @@ dependencies {
     implementation(libs.androidx.navigation.fragment)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.compiler)
+    implementation(libs.swiperefreshlayout)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.camera.camera2.pipe)
+    implementation(libs.filament.android)
+    implementation(libs.navigation.fragment.ktx)
+    implementation(libs.navigation.ui.ktx)
+    implementation(libs.androidx.navigation.runtime.ktx)
+    implementation(libs.androidx.webgpu)
+    implementation(libs.androidx.remote.creation.core)
 
 
     // Testing
@@ -108,6 +121,13 @@ dependencies {
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)
 
+    //Room
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    kapt(libs.room.compiler)
+    implementation("com.google.guava:guava:33.3.0-android")
+    // 协程（确保有
+    implementation(libs.kotlin.coroutines)
     //xml
     implementation("com.github.bumptech.glide:glide:4.16.0")
     //卡片样式
@@ -120,5 +140,13 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")  // 最新稳定版
-    implementation("androidx.navigation:navigation-ui-ktx:2.7.7")       // 包含 setupWithNavController
+    implementation("androidx.navigation:navigation-ui-ktx:2.7.7")    // 包含 setupWithNavController
+    implementation("com.google.android.material:material:1.11.0")
+
+    // JSON 序列化
+    implementation ("com.google.code.gson:gson:2.10.1")
+
+    // Glide 图片加载
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    kapt ("com.github.bumptech.glide:compiler:4.16.0")
 }

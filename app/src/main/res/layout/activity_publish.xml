@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/activitypublishroot"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    android:background="#F7F7F7"
+    android:fitsSystemWindows="true">
+
+    <!-- 修改顶部栏约束 -->
+    <RelativeLayout
+        android:id="@+id/topBar"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:paddingHorizontal="16dp"
+        android:layout_marginTop="45dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_arrow_back"/>
+
+        <TextView
+            android:layout_centerInParent="true"
+            android:text="写文章"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <Button
+            android:id="@+id/btnPublish"
+            android:layout_width="65dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:text="发表"
+            android:textSize="12sp"
+            android:textColor="@color/app_background"/>
+    </RelativeLayout>
+
+    <!-- 修改滚动区域 -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/contentScroll"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        android:overScrollMode="never"
+
+        app:layout_constraintTop_toBottomOf="@id/topBar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+         app:layout_constraintEnd_toEndOf="parent">
+
+    <LinearLayout
+        android:id="@+id/contentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="4dp"
+        android:minHeight="200dp">
+
+        <!-- 标题 -->
+        <EditText
+            android:id="@+id/etTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="标题"
+            android:textSize="30sp"
+            android:background="@color/app_background"
+            android:paddingVertical="12dp"
+            android:paddingHorizontal="16dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#EEEEEE"/>
+
+        <!-- 编辑器 -->
+        <com.fishmemory.app.ui.publish.richtext.editor.RichEditorView
+            android:id="@+id/editorView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="200dp"
+            android:background="@color/app_background"/>
+        <TextView
+            android:id="@+id/whoCanSee"
+            android:layout_width="match_parent"
+            android:layout_marginTop="11dp"
+            android:layout_height="45dp"
+            android:text=" 谁可以看"
+            android:gravity="center_vertical"
+            android:background="@color/app_background"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:background="@android:color/transparent"/>
+
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
+
+    <!-- 底部工具栏 -->
+<LinearLayout
+android:id="@+id/bottomBar"
+android:layout_width="0dp"
+android:layout_height="wrap_content"
+android:minHeight="60dp"
+android:orientation="horizontal"
+android:background="@color/app_background"
+android:elevation="4dp"
+app:layout_constraintBottom_toBottomOf="parent"
+app:layout_constraintStart_toStartOf="parent"
+app:layout_constraintEnd_toEndOf="parent">
+
+        <Button
+            android:id="@+id/btnBold"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:backgroundTint="#00FFFFFF"
+            android:elevation="0dp"
+            android:stateListAnimator="@null"
+
+            android:text="B"
+            android:textColor="@color/app_primary"
+            android:textSize="20dp"/>
+
+        <Button
+            android:id="@+id/btnUnderline"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:backgroundTint="#00FFFFFF"
+            android:elevation="0dp"
+            android:stateListAnimator="@null"
+
+            android:text="U"
+            android:textColor="@color/app_primary"
+            android:textSize="20dp"/>
+
+        <Button
+            android:id="@+id/btnImage"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:backgroundTint="#00FFFFFF"
+            android:elevation="0dp"
+            android:gravity="center"
+
+            android:stateListAnimator="@null"
+
+            android:text="I"
+            android:textColor="@color/app_primary"
+            android:textSize="20dp"/>
+    </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>

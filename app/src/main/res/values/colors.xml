@@ -31,4 +31,7 @@
     <color name="rank_silver">#C0C0C0</color>
     <color name="rank_bronze">#CD7F32</color>
     <color name="rank_normal">#9E9E9E</color>
+    <color name="search_stroke">#20000000</color>
+    <color name="search_shadow">#10000000</color>
+    <color name="search_icon">#FF6200EE</color>
 </resources>

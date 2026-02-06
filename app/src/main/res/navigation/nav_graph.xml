@@ -1,19 +1,61 @@
-<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
     app:startDestination="@id/homeFragment">
 
+    <!-- 首页 -->
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.fishmemory.app.xml.fragment.HomeFragment"
+        android:name="com.fishmemory.app.ui.home.HomeFragment"
         android:label="首页" />
+
+    <!-- 沸点 -->
     <fragment
-        android:id="@+id/hotRankingFragment"
-        android:name="com.fishmemory.app.xml.fragment.HotRankingFragment"
+        android:id="@+id/hotFragment"
+        android:name="com.fishmemory.app.ui.community.HotRankingFragment"
         android:label="沸点" />
+
+    <!-- 消息 -->
+    <fragment
+        android:id="@+id/messageFragment"
+        android:name="com.fishmemory.app.ui.message.MessageFragment"
+        android:label="消息" />
+
+    <!-- 我的 -->
     <fragment
         android:id="@+id/myFragment"
-        android:name="com.fishmemory.app.xml.fragment.MyFragment"
-        android:label="我" />
+        android:name="com.fishmemory.app.ui.mine.MyFragment"
+        android:label="我的" />
+
+    <!-- ✅ 全局 Tab 切换 Actions（核心！） -->
+    <action
+        android:id="@+id/action_switch_to_home"
+        app:destination="@id/homeFragment"
+        app:launchSingleTop="true"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="false" />
+
+    <action
+        android:id="@+id/action_switch_to_hot"
+        app:destination="@id/hotFragment"
+        app:launchSingleTop="true"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="false" />
+
+    <action
+        android:id="@+id/action_switch_to_message"
+        app:destination="@id/messageFragment"
+        app:launchSingleTop="true"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="false" />
+
+    <action
+        android:id="@+id/action_switch_to_my"
+        app:destination="@id/myFragment"
+        app:launchSingleTop="true"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="false" />
 
 </navigation>

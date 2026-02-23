@@ -1,11 +1,9 @@
 import org.gradle.kotlin.dsl.implementation
-import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("kotlin-kapt")
-
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -18,68 +16,61 @@ android {
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
+        vectorDrawables.useSupportLibrary = true
+    }
 
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
+    }
 
-        buildFeatures { viewBinding = true }
+    buildFeatures {
+        viewBinding = true
+        compose = true
+    }
 
-        buildTypes {
-            release {
-                isMinifyEnabled = false
-                proguardFiles(
-                    getDefaultProguardFile("proguard-android-optimize.txt"),
-                    "proguard-rules.pro"
-                )
-            }
-        }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.11"
+    }
 
-        compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_1_8
-            targetCompatibility = JavaVersion.VERSION_1_8
-        }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
 
-        kotlinOptions {
-            jvmTarget = "1.8"
-        }
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 
-        buildFeatures {
-            compose = true
-        }
-
-        composeOptions {
-            kotlinCompilerExtensionVersion = "1.5.11"
-        }
-
-        packaging {
-            resources {
-                excludes += "/META-INF/{AL2.0,LGPL2.1}"
-            }
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
 }
 
 dependencies {
-    // AndroidX Core
+    // AndroidX Core（统一使用 libs 引用）
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.fragment.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
-    // Compose BOM
+    // Compose BOM（主 UI 栈为 ViewBinding + Navigation，Compose 预备接入）
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
-
-    // Material Icons - 使用正确的引用名称
     implementation(libs.compose.material.icons.core)
     implementation(libs.compose.material.icons.extended)
-
-    // Navigation - 使用正确的引用名称
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
@@ -91,26 +82,33 @@ dependencies {
     implementation(libs.retrofit.gson)
     implementation(libs.okhttp.logging)
 
-    // Image
+    // 序列化与图片（libs 统一）
+    implementation(libs.gson)
+    implementation(libs.glide)
+    implementation(libs.androidx.media3.common.ktx)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
+    ksp(libs.glide.compiler)
     implementation(libs.coil.compose)
-    implementation(libs.androidx.material3)
+
+    // 图片裁剪
+    implementation("com.github.yalantis:ucrop:2.2.8")
+
+    // View 层：Material、Navigation、RecyclerView、SwipeRefresh
+    implementation(libs.material)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.recyclerview)
     implementation(libs.androidx.swiperefreshlayout)
     implementation(libs.androidx.navigation.fragment)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
-    implementation(libs.androidx.compiler)
-    implementation(libs.swiperefreshlayout)
-    implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.androidx.camera.camera2.pipe)
-    implementation(libs.filament.android)
-    implementation(libs.navigation.fragment.ktx)
-    implementation(libs.navigation.ui.ktx)
     implementation(libs.androidx.navigation.runtime.ktx)
-    implementation(libs.androidx.webgpu)
-    implementation(libs.androidx.remote.creation.core)
 
+    // Room（含 KTX 与协程支持，用 KSP 替代 kapt 避免 kapt 模块加载错误）
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+    implementation(libs.guava.android)
 
     // Testing
     testImplementation(libs.junit)
@@ -121,32 +119,5 @@ dependencies {
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)
 
-    //Room
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    kapt(libs.room.compiler)
-    implementation("com.google.guava:guava:33.3.0-android")
-    // 协程（确保有
-    implementation(libs.kotlin.coroutines)
-    //xml
-    implementation("com.github.bumptech.glide:glide:4.16.0")
-    //卡片样式
-    implementation("com.google.android.material:material:1.9.0")
-
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
-
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.fragment:fragment-ktx:1.6.2")
-    implementation("com.google.code.gson:gson:2.10.1")
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")  // 最新稳定版
-    implementation("androidx.navigation:navigation-ui-ktx:2.7.7")    // 包含 setupWithNavController
-    implementation("com.google.android.material:material:1.11.0")
-
-    // JSON 序列化
-    implementation ("com.google.code.gson:gson:2.10.1")
-
-    // Glide 图片加载
-    implementation ("com.github.bumptech.glide:glide:4.16.0")
-    kapt ("com.github.bumptech.glide:compiler:4.16.0")
+    implementation(libs.androidx.cardview)
 }

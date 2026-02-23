@@ -17,12 +17,15 @@
     <color name="app_secondary">#FF625B71</color>
     <color name="app_on_secondary">#FFFFFFFF</color>
     <color name="app_secondary_container">#FFE8DEF8</color>
+<color name="holo_purple">#FFAA66CC</color>
 
     <!-- 背景色 -->
     <color name="app_background">#FFFFFBFE</color>
     <color name="app_on_background">#FF1C1B1F</color>
 
     <color name="gray">#666666</color>
+    <!-- 富文本引用块文字颜色 -->
+    <color name="richtext_quote_text">#666666</color>
     <!-- 图标颜色 -->
     <color name="icon_color">#666666</color>
     <!-- 选中状态的图标颜色 -->

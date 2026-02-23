@@ -1,5 +1,6 @@
 package com.fishmemory.app.data.model
 
+/** 热榜列表项模型（UI/接口共用）。 */
 data class HotRankItem(
     val id: Int,
     val title: String,

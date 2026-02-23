@@ -1,9 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.FishMemory" parent="Theme.MaterialComponents.Light.NoActionBar" >
+    <style name="Theme.FishMemory" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="colorPrimary">@color/app_primary</item>
+        <item name="colorPrimaryVariant">@color/app_primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+    </style>
 
+    <!-- 专门给 uCropActivity 用的主题：不透明、浅色状态栏，内容从状态栏下方开始 -->
+    <style name="Theme.FishMemory.UCrop" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/app_primary</item>
+        <item name="colorPrimaryVariant">@color/app_primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+
+        <!-- 使用浅色状态栏，和应用整体背景风格一致 -->
+        <item name="android:statusBarColor">@color/app_background</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <!-- 浅色状态栏，使用深色图标 -->
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
 </resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 外部存储的根目录 -->
+    <external-path name="external_root" path="." />
+
+    <!-- 外部存储的根目录下的特定路径 -->
+    <external-path name="external_documents" path="Android/data/com.fishmemory.app/files/Documents/" />
+
+    <!-- 外部存储的根目录下的任意路径（使用通配符） -->
+    <external-path name="external_all" path="." />
+
+    <!-- 外部存储的特定目录（推荐使用这个） -->
+    <external-files-path name="external_files" path="Documents/articles/" />
+
+    <!-- 缓存目录 -->
+    <cache-path name="cache" path="/" />
+
+    <!-- 外部缓存目录 -->
+    <external-cache-path name="external_cache" path="." />
+
+    <!-- 外部文件目录（各种类型） -->
+    <external-files-path name="external_files_docs" path="Documents/" />
+    <external-files-path name="external_files_docs_articles" path="Documents/articles/" />
+</paths>

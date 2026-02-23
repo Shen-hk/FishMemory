@@ -6,6 +6,10 @@ import com.fishmemory.app.data.local.rooms.entity.ArticleEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
+/**
+ * 文章数据统一入口：收藏状态与持久化（Room）；网络拉取由调用方经 PostApi 完成，后续可并入本类。
+ * UI 层应通过 ViewModel 访问本 Repository，不直接持有 Dao 或 NetworkClient。
+ */
 class ArticleRepository(private val articleDao: ArticleDao) {
 
     fun getCollectedArticles(): Flow<List<ArticleEntity>> =

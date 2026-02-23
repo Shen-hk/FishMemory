@@ -5,7 +5,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
     android:background="#F7F7F7"
     android:fitsSystemWindows="true">
 
@@ -35,6 +34,29 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
+        <TextView
+            android:id="@+id/tvDraftStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@id/btnBack"
+            android:layout_marginStart="12dp"
+            android:text="未保存"
+            android:textSize="12sp"
+            android:textColor="@color/gray" />
+
+        <Button
+            android:id="@+id/btnDrafts"
+            android:layout_width="65dp"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@id/btnPublish"
+            android:layout_marginEnd="10dp"
+            android:background="null"
+            android:text="草稿"
+            android:textSize="12sp"
+            android:textColor="@color/gray" />
+
         <Button
             android:id="@+id/btnPublish"
             android:layout_width="65dp"
@@ -46,81 +68,40 @@
             android:textColor="@color/app_background"/>
     </RelativeLayout>
 
-    <!-- 修改滚动区域 -->
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/contentScroll"
+    <!-- 正文编辑区：标题 + 各种 Block 统一由 BlockEditorRecyclerView 管理并滚动 -->
+    <com.fishmemory.app.ui.publish.richtext.ui.container.BlockEditorRecyclerView
+        android:id="@+id/blockEditorView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:fillViewport="true"
-        android:overScrollMode="never"
-
+        android:background="@color/app_background"
+        android:clipToPadding="false"
+        android:minHeight="200dp"
         app:layout_constraintTop_toBottomOf="@id/topBar"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomBarScroll"
         app:layout_constraintStart_toStartOf="parent"
-         app:layout_constraintEnd_toEndOf="parent">
-
-    <LinearLayout
-        android:id="@+id/contentContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="4dp"
-        android:minHeight="200dp">
-
-        <!-- 标题 -->
-        <EditText
-            android:id="@+id/etTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="标题"
-            android:textSize="30sp"
-            android:background="@color/app_background"
-            android:paddingVertical="12dp"
-            android:paddingHorizontal="16dp"/>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#EEEEEE"/>
-
-        <!-- 编辑器 -->
-        <com.fishmemory.app.ui.publish.richtext.editor.RichEditorView
-            android:id="@+id/editorView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="200dp"
-            android:background="@color/app_background"/>
-        <TextView
-            android:id="@+id/whoCanSee"
-            android:layout_width="match_parent"
-            android:layout_marginTop="11dp"
-            android:layout_height="45dp"
-            android:text=" 谁可以看"
-            android:gravity="center_vertical"
-            android:background="@color/app_background"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="400dp"
-            android:background="@android:color/transparent"/>
-
-
-    </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- 底部工具栏 -->
-<LinearLayout
-android:id="@+id/bottomBar"
-android:layout_width="0dp"
-android:layout_height="wrap_content"
-android:minHeight="60dp"
-android:orientation="horizontal"
-android:background="@color/app_background"
-android:elevation="4dp"
-app:layout_constraintBottom_toBottomOf="parent"
-app:layout_constraintStart_toStartOf="parent"
-app:layout_constraintEnd_toEndOf="parent">
+    <HorizontalScrollView
+        android:id="@+id/bottomBarScroll"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+    <LinearLayout
+        android:id="@+id/bottomBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:minHeight="60dp"
+        android:orientation="horizontal"
+        android:background="@color/app_background"
+        android:elevation="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <Button
             android:id="@+id/btnBold"
@@ -129,10 +110,10 @@ app:layout_constraintEnd_toEndOf="parent">
             android:backgroundTint="#00FFFFFF"
             android:elevation="0dp"
             android:stateListAnimator="@null"
-
             android:text="B"
             android:textColor="@color/app_primary"
             android:textSize="20dp"/>
+
 
         <Button
             android:id="@+id/btnUnderline"
@@ -141,8 +122,19 @@ app:layout_constraintEnd_toEndOf="parent">
             android:backgroundTint="#00FFFFFF"
             android:elevation="0dp"
             android:stateListAnimator="@null"
-
             android:text="U"
+            android:textColor="@color/app_primary"
+            android:textSize="20dp"/>
+
+        <!-- 标题块按钮：切换当前块为 Heading 样式 -->
+        <Button
+            android:id="@+id/btnHeading"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:backgroundTint="#00FFFFFF"
+            android:elevation="0dp"
+            android:stateListAnimator="@null"
+            android:text="H"
             android:textColor="@color/app_primary"
             android:textSize="20dp"/>
 
@@ -153,12 +145,81 @@ app:layout_constraintEnd_toEndOf="parent">
             android:backgroundTint="#00FFFFFF"
             android:elevation="0dp"
             android:gravity="center"
-
             android:stateListAnimator="@null"
-
             android:text="I"
             android:textColor="@color/app_primary"
             android:textSize="20dp"/>
-    </LinearLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <ImageButton
+            android:id="@+id/btnVideo"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:backgroundTint="#00FFFFFF"
+            android:elevation="0dp"
+            android:src="@drawable/ic_video_play"
+            android:stateListAnimator="@null"
+            android:scaleType="centerInside"
+            android:contentDescription="视频" />
+
+        <!-- 无序列表：使用 “•” 文本按钮，简单直观 -->
+        <Button
+            android:id="@+id/btnBulletList"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:backgroundTint="#00FFFFFF"
+            android:elevation="0dp"
+            android:stateListAnimator="@null"
+            android:text="•"
+            android:textColor="@color/app_primary"
+            android:textSize="20dp"/>
+
+        <!-- 有序列表：使用 “1.” 文本按钮，表示数字列表 -->
+        <Button
+            android:id="@+id/btnNumberList"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:backgroundTint="#00FFFFFF"
+            android:elevation="0dp"
+            android:stateListAnimator="@null"
+            android:text="1."
+            android:textColor="@color/app_primary"
+            android:textSize="20dp"/>
+
+          <ImageButton
+        android:id="@+id/btnQuote"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:backgroundTint="#00FFFFFF"
+        android:elevation="0dp"
+        android:src="@drawable/ic_quote"
+        android:stateListAnimator="@null"
+        android:scaleType="centerInside" />
+
+        <ImageButton
+            android:id="@+id/btnHr"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:backgroundTint="#00FFFFFF"
+            android:elevation="0dp"
+            android:src="@drawable/ic_hr"
+            android:stateListAnimator="@null"
+            android:scaleType="centerInside"
+            />
+
+        <ImageButton
+            android:id="@+id/btnCode"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:backgroundTint="#00FFFFFF"
+            android:elevation="0dp"
+            android:src="@drawable/ic_code"
+            android:stateListAnimator="@null"
+            android:scaleType="centerInside" />
+
+
+
+
+    </LinearLayout>
+    </HorizontalScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

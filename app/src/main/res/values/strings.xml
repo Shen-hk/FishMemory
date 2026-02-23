@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">FishMemory</string>
     <string name="fishmemory_xml">FishMemory-XML版本</string>
+    <string name="local_article_author">本地用户</string>
+    <string name="untitled_article">未命名文章</string>
 </resources>

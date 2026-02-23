@@ -3,6 +3,7 @@ package com.fishmemory.app.data.local.rooms.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+/** Room 本地表：文章收藏记录，仅持久化 id/title/url/收藏态。 */
 @Entity(tableName = "articles")
 data class ArticleEntity(
     @PrimaryKey val id: Int,

@@ -16,7 +16,7 @@
         app:defaultNavHost="true"
         app:navGraph="@navigation/nav_graph" />
 
-    <com.fishmemory.app.ui.custom.BottomNavWithFab
+    <com.fishmemory.app.ui.common.BottomNavWithFab
         android:id="@+id/bottom_nav_bg"
         android:layout_width="match_parent"
         android:layout_height="70dp"

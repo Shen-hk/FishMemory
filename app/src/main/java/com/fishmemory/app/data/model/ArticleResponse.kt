@@ -2,6 +2,7 @@ package com.fishmemory.app.data.model
 
 import androidx.compose.runtime.Immutable
 
+/** 网络接口返回的列表包装（code/msg/data）。 */
 @Immutable
 data class ArticleResponse(
     val code: Int,
@@ -9,6 +10,7 @@ data class ArticleResponse(
     val data: ResultData
 )
 
+/** 列表 data 节点（分页 + 列表）。 */
 @Immutable
 data class ResultData(
     val curpage: Int,
@@ -16,6 +18,7 @@ data class ResultData(
     val newslist: List<DmItArticle>
 )
 
+/** 单条文章网络 DTO（接口字段与命名保持与后端一致）。 */
 @Immutable
 data class DmItArticle(
     val id: String,

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 基础灰底 -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#F6F8FA" />
+            <corners android:radius="6dp" />
+        </shape>
+    </item>
+
+    <!-- 5% 透明紫色覆层（增强选中感） -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#0D6200EE" />
+            <corners android:radius="6dp" />
+        </shape>
+    </item>
+
+    <!-- 紫色描边 -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/transparent" />
+            <stroke
+                android:width="2dp"
+                android:color="#6200EE" />
+            <corners android:radius="6dp" />
+        </shape>
+    </item>
+
+</layer-list>
+

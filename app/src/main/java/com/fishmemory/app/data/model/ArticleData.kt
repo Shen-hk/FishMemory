@@ -2,6 +2,7 @@ package com.fishmemory.app.data.model
 
 import androidx.compose.runtime.Immutable
 
+/** 列表/详情页使用的文章领域模型，可来自网络 DTO 转换或本地合并收藏状态。 */
 @Immutable
 data class ArticleData(
     // 基础标识字段

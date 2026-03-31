@@ -63,7 +63,8 @@ class CodeBlockViewHolder(
         setEditable(isSelected)
 
         etCode.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) {
+            // 仅在“当前代码块处于选中可编辑态”时上报焦点，避免滚动浏览触发无意义的滚动校正。
+            if (hasFocus && this.block?.isSelected == true) {
                 onFocusGained(block.id)
             }
         }
@@ -116,7 +117,10 @@ class CodeBlockViewHolder(
                 // 防抖：取消上一次，延迟 300ms 再渲染
                 highlightRunnable?.let { handler.removeCallbacks(it) }
                 val runnable = Runnable {
-                   codeUiActions.applyHighlight(etCode, block.content.toString(), b.language)
+                    // 仅做展示高亮，不应再次触发 afterTextChanged 的业务回调链。
+                    internalChange = true
+                    codeUiActions.applyHighlight(etCode, b.content.toString(), b.language)
+                    internalChange = false
                 }
                 highlightRunnable = runnable
                 handler.postDelayed(runnable, 300)
@@ -125,7 +129,9 @@ class CodeBlockViewHolder(
         etCode.addTextChangedListener(textWatcher)
 
         // 首次绑定也做一次高亮
+        internalChange = true
         codeUiActions.applyHighlight(etCode, block.content.toString(), block.language)
+        internalChange = false
     }
 
     fun clear() {

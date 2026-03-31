@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.fishmemory.app.core.utils.view.setStatusBarIconsBlack
 import com.fishmemory.app.databinding.ActivityPublishBinding
 import com.fishmemory.app.ui.publish.draft.PublishDraftCoordinator
 import com.fishmemory.app.ui.publish.draftlist.DraftListActivity
@@ -108,6 +109,8 @@ class PublishActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityPublishBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        window.setStatusBarIconsBlack()
 
         permissionHandler = VidepPermissionHandler(this)
 

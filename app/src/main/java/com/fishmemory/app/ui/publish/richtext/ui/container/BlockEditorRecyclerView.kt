@@ -355,8 +355,10 @@ class BlockEditorRecyclerView @JvmOverloads constructor(
         }
     }
     private fun handleEnterRequested(blockId: String, cursorPos: Int): Boolean {
+        Log.d("URLEnter", "[handleEnterRequested] blockId=$blockId, cursorPos=$cursorPos")
         // 当前行仅 URL → 转为 LinkCard 块（消费 Enter）
         val result = actionManager.handleEnterRequested(blockId, cursorPos)
+        Log.d("URLEnter", "[handleEnterRequested] actionManager returned: $result")
         if (result != null && result.focusTargetDataPos != null) {
             selectionManager.focusAfterUrlLineConvertedToLinkCard(
                 focusTargetDataPos = result.focusTargetDataPos,
@@ -408,11 +410,6 @@ class BlockEditorRecyclerView @JvmOverloads constructor(
             selection = result.selection
         )
     }
-
-
-// ... existing code ...
-
-// ... existing code ...
 
 
     private fun handleLinkCardDelete(blockId: String) {

@@ -46,10 +46,12 @@ class CodeUiActions(
             editText.setSelection(len)
         }
 
-        // 请求滚动到光标位置
-        val r = android.graphics.Rect()
-        editText.getFocusedRect(r)
-        editText.requestRectangleOnScreen(r, true)
+        // 仅在当前输入框已聚焦时再请求可见，避免 RecyclerView 滚动浏览时抖动。
+        if (editText.hasFocus()) {
+            val r = android.graphics.Rect()
+            editText.getFocusedRect(r)
+            editText.requestRectangleOnScreen(r, true)
+        }
     }
 
     /**

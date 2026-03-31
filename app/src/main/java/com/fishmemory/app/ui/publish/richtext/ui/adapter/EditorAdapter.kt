@@ -172,8 +172,8 @@ class EditorAdapter(
                 is ImageBlockViewHolder -> (display as? EditorBlockDisplay.Image)?.let { holder.bindReadOnly(it, onImageBlockPreviewRequested) }
                 is HrBlockViewHolder -> (display as? EditorBlockDisplay.Hr)?.let { holder.bindReadOnly() }
                 is CodeBlockViewHolder -> (display as? EditorBlockDisplay.Code)?.let { holder.bindReadOnly(it) }
-                is LinkCardViewHolder -> (display as? EditorBlockDisplay.LinkCard)?.let {
-                    linkUiActions?.let { actions -> holder.bindReadOnly(it, actions) }
+                is LinkCardViewHolder -> (display as? EditorBlockDisplay.LinkCard)?.let { 
+                    holder.bindReadOnly(it, linkUiActions) 
                 }
                 is VideoBlockViewHolder -> (display as? EditorBlockDisplay.Video)?.let { holder.bindReadOnly(it) }
                 is ListItemBlockViewHolder -> (display as? EditorBlockDisplay.ListBlock)?.let { holder.bindReadOnly(it) }
@@ -212,7 +212,8 @@ class EditorAdapter(
                     }
 
                     override fun onEnterRequested(blockId: String, cursorPos: Int): Boolean {
-                        return this@EditorAdapter.onEnterRequested?.invoke(blockId, cursorPos) == true
+                        val result = this@EditorAdapter.onEnterRequested?.invoke(blockId, cursorPos)
+                        return result == true
                     }
 
                     override fun onMergeRequested(blockId: String): OperationFocusResult? {

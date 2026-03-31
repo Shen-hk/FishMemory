@@ -19,11 +19,13 @@ class FocusManager(
     fun getLastFocusedBlockId(): String? = lastFocusedBlockId
 
     fun onTextBlockFocusGained(blockId: String) {
+        if (lastFocusedBlockId == blockId) return
         lastFocusedBlockId = blockId
         scrollToBlock(blockId)
     }
 
     fun onCodeBlockFocusGained(blockId: String) {
+        if (lastFocusedBlockId == blockId) return
         lastFocusedBlockId = blockId
         scrollToBlock(blockId)
     }

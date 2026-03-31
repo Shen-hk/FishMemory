@@ -92,10 +92,10 @@ class LinkCardViewHolder(
         }
     }
 
-    /** 只读态：展示标题/描述/图，点击跳转浏览器，长按复制链接。 */
+    /** 只读态：展示标题/描述/图，有 LinkUiActions 时支持点击跳转和长按复制。 */
     fun bindReadOnly(
         display: EditorBlockDisplay.LinkCard,
-        linkUiActions: LinkUiActions  // 必需参数：只读态需要 LinkUiActions 处理交互
+        linkUiActions: LinkUiActions? = null
     ) {
         block = null
         this.linkUiActions = linkUiActions
@@ -116,22 +116,25 @@ class LinkCardViewHolder(
             Glide.with(binding.ivCover).clear(binding.ivCover)
         }
 
+        // 根据 LinkUiActions 是否存在设置交互
+        if (linkUiActions != null) {
+            binding.cardRoot.setOnClickListener {
+                linkUiActions.openLinkCardUrl(binding.root.context, display.url)
+            }
+            binding.cardRoot.setOnLongClickListener {
+                linkUiActions.copyLinkToClipboard(
+                    context = binding.root.context,
+                    url = display.url,
+                    label = "链接"
+                )
+                true
+            }
+        } else {
+            binding.cardRoot.setOnClickListener(null)
+            binding.cardRoot.setOnLongClickListener(null)
+        }
+        
         binding.ivDelete.setOnClickListener(null)
-
-        // 点击跳转浏览器 - 委托给 LinkUiActions
-        binding.cardRoot.setOnClickListener {
-            linkUiActions.openLinkCardUrl(binding.root.context, display.url)
-        }
-
-        // 长按复制链接 - 委托给 LinkUiActions
-        binding.cardRoot.setOnLongClickListener {
-            linkUiActions.copyLinkToClipboard(
-                context = binding.root.context,
-                url = display.url,
-                label = "链接"
-            )
-            true
-        }
     }
 
     fun clear() {

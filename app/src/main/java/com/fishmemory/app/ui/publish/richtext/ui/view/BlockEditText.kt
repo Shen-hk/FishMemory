@@ -5,6 +5,7 @@ import android.graphics.Rect
 import android.util.AttributeSet
 import android.util.Log
 import android.view.KeyEvent
+import android.view.inputmethod.EditorInfo
 import androidx.appcompat.widget.AppCompatEditText
 import com.fishmemory.app.ui.publish.richtext.config.EditorConfig
 import com.fishmemory.app.ui.publish.richtext.core.BlockInteractionListener
@@ -65,6 +66,24 @@ class BlockEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) : AppCompatEditText(context, attrs) {
+    init {
+        // 部分输入法回车不会分发 KEYCODE_ENTER，而是走 editor action。
+        // 这里做兜底转发，保证“回车转卡片/分裂”语义一致。
+        setOnEditorActionListener { _, actionId, event ->
+            if (event != null) return@setOnEditorActionListener false
+            if (EditorSelectionHelper.hasComposingText(this)) return@setOnEditorActionListener false
+
+            val isImeEnterLike =
+                actionId == EditorInfo.IME_NULL ||
+                    actionId == EditorInfo.IME_ACTION_DONE ||
+                    actionId == EditorInfo.IME_ACTION_GO ||
+                    actionId == EditorInfo.IME_ACTION_SEND
+
+            if (!isImeEnterLike) return@setOnEditorActionListener false
+            handleEnterAtCurrentCursor()
+        }
+    }
+
 
     /** 唯一标识符，用于定位具体的文本块 */
     var blockId: String = ""
@@ -148,15 +167,7 @@ class BlockEditText @JvmOverloads constructor(
         when (keyCode) {
             KeyEvent.KEYCODE_ENTER -> {
                 if (event.action == KeyEvent.ACTION_DOWN && !event.isShiftPressed) {
-                    val cursor = selectionStart
-                    // 逻辑转发：先尝试特殊处理，再尝试分裂
-                    val handled = interactionListener?.onEnterRequested(blockId, cursor) == true
-                            || interactionListener?.onSplitRequested(blockId, cursor) != null
-
-                    if (handled) {
-                        Log.d(EditorConfig.TAG_EDIT_TEXT, "Enter action consumed.")
-                        return true
-                    }
+                    if (handleEnterAtCurrentCursor()) return true
                 }
             }
             KeyEvent.KEYCODE_DEL -> {
@@ -177,6 +188,29 @@ class BlockEditText @JvmOverloads constructor(
             }
         }
         return super.onKeyDown(keyCode, event)
+    }
+
+    private fun handleEnterAtCurrentCursor(): Boolean {
+        val cursor = selectionStart.coerceAtLeast(0)
+        Log.d(EditorConfig.TAG_EDIT_TEXT, "Enter pressed at cursor=$cursor, textLength=${text?.length}")
+
+        // 逻辑转发：优先尝试 URL 转卡片，其次尝试分裂
+        val enterResult = interactionListener?.onEnterRequested(blockId, cursor)
+        Log.d(EditorConfig.TAG_EDIT_TEXT, "onEnterRequested returned: $enterResult")
+        if (enterResult == true) {
+            Log.d(EditorConfig.TAG_EDIT_TEXT, "Enter handled by onEnterRequested.")
+            return true
+        }
+
+        val splitResult = interactionListener?.onSplitRequested(blockId, cursor)
+        Log.d(EditorConfig.TAG_EDIT_TEXT, "onSplitRequested returned: $splitResult")
+        if (splitResult != null) {
+            Log.d(EditorConfig.TAG_EDIT_TEXT, "Enter handled by onSplitRequested.")
+            return true
+        }
+
+        Log.d(EditorConfig.TAG_EDIT_TEXT, "Enter not handled, will use default behavior.")
+        return false
     }
 
     /**

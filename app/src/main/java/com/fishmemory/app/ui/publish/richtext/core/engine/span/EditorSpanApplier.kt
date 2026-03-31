@@ -129,21 +129,8 @@ object EditorSpanApplier {
      * - **完全覆盖**（操作区间包含 Span）：删除该 Span（即取消样式）
      * - **左侧未选中**：保留左侧部分 `[spanStart, start)`
      * - **右侧未选中**：保留右侧部分 `[end, spanEnd)`
-     *
-     * ## 示例
-     *
-     * 假设 `[0-10]` 已加粗，用户选中 `[5-15]` 并点击加粗：
-     * 1. 移除原 Span `[0-10]`
-     * 2. 保留左侧 `[0-5]`（未选中部分）
-     * 3. 不恢复中间 `[5-10]`（被完全覆盖，即取消加粗）
-     * 4. 不添加右侧（超出原 Span 范围）
-     * 5. 最终结果：`[0-5]` 保持加粗，`[5-15]` 无加粗
-     *
-     * @param editable 目标文本
-     * @param start 选区起始位置
-     * @param end 选区结束位置
-     * @param spanPrototype 样式原型（用于克隆）
      */
+
     private fun applyOrRemoveSpan(
         editable: Editable,
         start: Int,

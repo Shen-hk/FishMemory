@@ -8,6 +8,7 @@ import com.fishmemory.app.ui.publish.richtext.business.link.LinkSpan
 import com.fishmemory.app.ui.publish.richtext.core.model.EditorBlock
 import com.fishmemory.app.ui.publish.richtext.core.model.EditorBlockEntity
 import android.text.Spanned
+import android.util.Log
 import com.fishmemory.app.ui.publish.richtext.core.engine.validator.EditorUrlRules
 import com.fishmemory.app.ui.publish.richtext.business.selection.BlockEditorUiSideEffects
 import com.fishmemory.app.ui.publish.richtext.business.selection.OperationFocusResult
@@ -407,7 +408,7 @@ class BlockActionManager(
     /**
      * Enter 回车请求处理：
      * - 标题块跳过；
-     * - 若光标所在行是“纯 URL”，转换为 LinkCard，并返回可能的焦点交接信息。
+     * - 若光标所在行是"纯 URL"，转换为 LinkCard，并返回可能的焦点交接信息。
      */
     fun handleEnterRequested(blockId: String, cursorPos: Int): UrlLineToLinkCardResult? {
         val block = blockList.findBlock(blockId) as? EditorBlock.TextBlock ?: return null
@@ -417,10 +418,32 @@ class BlockActionManager(
         // 标题块不做 URL 行转卡片，避免误触
         if (block.isHeading) return null
 
-        val (lineStart, lineEnd) = EditorUrlRules.findCurrentLineRange(text, cursorPos)
-        val line = text.substring(lineStart, lineEnd).trim()
-        if (!EditorUrlRules.isValidUrlCandidate(line)) return null
+        // 软键盘回车常见为先插入 '\n' 再回调，此时 cursorPos 在换行后。
+        // 若不回退 1 位，会把“当前行”误判为空行，导致 URL 行无法转卡片。
+        val normalizedCursor = if (
+            cursorPos > 0 &&
+            cursorPos <= text.length &&
+            text[cursorPos - 1] == '\n'
+        ) {
+            cursorPos - 1
+        } else {
+            cursorPos
+        }
 
+        val (lineStart, lineEnd) = EditorUrlRules.findCurrentLineRange(text, normalizedCursor)
+        val line = text.substring(lineStart, lineEnd).trim()
+        
+        Log.d(
+            "URLDebug",
+            "[handleEnterRequested] line=[$line], lineStart=$lineStart, lineEnd=$lineEnd, cursorPos=$cursorPos, normalizedCursor=$normalizedCursor"
+        )
+        
+        if (!EditorUrlRules.isValidUrlCandidate(line)) {
+            Log.d("URLDebug", "[handleEnterRequested] isValidUrlCandidate=false")
+            return null
+        }
+
+        Log.d("URLDebug", "[handleEnterRequested] calling transformUrlLineToLinkCard")
         return transformUrlLineToLinkCard(
             blockId = blockId,
             url = line,

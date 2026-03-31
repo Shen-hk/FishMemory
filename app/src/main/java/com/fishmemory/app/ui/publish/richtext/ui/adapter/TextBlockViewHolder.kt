@@ -50,7 +50,8 @@ class TextBlockViewHolder(
             blockId = block.id,
             onContentChanged = { id ->
                 blockView.editText.interactionListener?.onContentChanged(id)
-            }
+            },
+            interactionListener = blockView.editText.interactionListener
         )
     }
 

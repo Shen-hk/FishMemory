@@ -131,8 +131,11 @@ class BlockEditText @JvmOverloads constructor(
         previouslyFocusedRect: Rect?
     ) {
         super.onFocusChanged(focused, direction, previouslyFocusedRect)
-        if (focused && blockId.isNotEmpty()) {
+        if (blockId.isEmpty()) return
+        if (focused) {
             interactionListener?.onFocusGained(blockId)
+        } else {
+            interactionListener?.onFocusLost(blockId)
         }
     }
 

@@ -33,7 +33,7 @@ object BlockIdGenerator {
 class EditorBlockList {
 
     private val blocks = mutableListOf<EditorBlock>()
-
+    //防御性编程封装
     fun getBlocks(): List<EditorBlock> = blocks.toList()
 
     fun insertBlockAfter(id: String, block: EditorBlock) {

@@ -3,4 +3,14 @@
     <string name="fishmemory_xml">FishMemory-XML版本</string>
     <string name="local_article_author">本地用户</string>
     <string name="untitled_article">未命名文章</string>
+    <string name="ai_polish_sparkle_cd">AI 润色</string>
+    <string name="ai_polish_style_formal">更正式</string>
+    <string name="ai_polish_style_shorter">更简短</string>
+    <string name="ai_polish_style_expand">扩写</string>
+    <string name="ai_polish_accept">替换</string>
+    <string name="ai_polish_retry">重试</string>
+    <string name="ai_polish_discard">放弃</string>
+    <string name="ai_polish_preview_label">预览</string>
+    <string name="ai_polish_missing_api_key">请在本机 local.properties 中配置 DEEPSEEK_API_KEY</string>
+    <string name="ai_polish_sheet_title">选择润色方式</string>
 </resources>

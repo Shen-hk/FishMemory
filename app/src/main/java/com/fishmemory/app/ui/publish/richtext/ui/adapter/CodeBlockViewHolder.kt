@@ -6,6 +6,7 @@ import android.os.Looper
 import android.text.Editable
 import android.text.SpannableStringBuilder
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -56,8 +57,10 @@ class CodeBlockViewHolder(
         this.onClickRequested = onClicked
         this.onBlockChanged = onBlockChanged
 
+        Log.d("CodeBind", "[bind] blockId=${block.id}, isSelected=$isSelected, position=$bindingAdapterPosition")
         root.isSelected = isSelected
         ivDelete.visibility = if (isSelected) View.VISIBLE else View.GONE
+        Log.d("CodeBind", "[bind] ivDelete visibility set to ${ivDelete.visibility}")
         tvLanguage.text = block.language.trim().ifEmpty { "CODE" }.uppercase()
 
         setEditable(isSelected)
@@ -81,11 +84,8 @@ class CodeBlockViewHolder(
         block.isSelected = isSelected
 
         etCode.setOnClickListener {
-            if (!isSelected) {
-               codeUiActions.copyCodeToClipboard(block.content.toString())
-                return@setOnClickListener
-            }
-            // 选中态：允许编辑，点击不再触发复制
+            // 无论是否选中态，都触发完整的选中流程
+            onClickRequested?.invoke(bindingAdapterPosition)
         }
         root.setOnClickListener {
             onClickRequested?.invoke(bindingAdapterPosition)

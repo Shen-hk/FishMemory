@@ -182,28 +182,10 @@ object EditorSpanApplier {
 
     /**
      * Span 归一化：合并相邻的同类 Span，减少碎片数量
-     *
-     * ## 为什么需要归一化？
-     *
-     * 用户频繁编辑时，会产生大量细小的 Span 片段：
-     * - 第一次加粗：`[0-5]`
-     * - 第二次加粗：`[5-10]`
-     * - 第三次加粗：`[10-15]`
-     *
-     * 如果不合并，会有 3 个 Span。归一化后合并为 1 个：`[0-15]`
-     *
-     * ## 合并规则
-     * 仅当两个 Span **刚好相邻**（前一个的结束 = 后一个的开始）时才合并：
-     * - `[0-5]` + `[5-10]` → 合并为 `[0-10]` ✓
-     * - `[0-5]` + `[6-10]` → 不合并（中间有间隙）✗
-     *
      * ## 性能优化
      * - 时间复杂度：O(n log n)，主要是排序开销
      * - 空间复杂度：O(n)，创建临时列表
      * - 提前退出：如果 Span 数量 ≤ 1，直接返回
-     *
-     * @param editable 目标文本
-     * @param sampleSpan 任意一个该类 Span 作为样本
      */
     private fun normalizeSpans(editable: Editable, sampleSpan: Any) {
         val spanClass = sampleSpan::class.java

@@ -7,6 +7,7 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import com.fishmemory.app.ui.publish.richtext.config.EditorConfig
 import com.fishmemory.app.ui.publish.richtext.config.EditorStyle
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * 代码高亮引擎：根据编程语言关键字、注释、字符串、数字等元素，
@@ -15,9 +16,9 @@ import com.fishmemory.app.ui.publish.richtext.config.EditorStyle
  * ## 核心功能
  * 
  * ### 1. 支持的语言
- * - Kotlin
- * - Java
- * - JavaScript
+ * - Kotlin, Java, JavaScript, TypeScript
+ * - Python, Go, Rust, C++, C#, Ruby, PHP, Swift
+ * - SQL, Shell/Bash, HTML, CSS
  * - 其他语言（默认使用 Kotlin 规则）
  * 
  * ### 2. 高亮规则
@@ -40,6 +41,16 @@ import com.fishmemory.app.ui.publish.richtext.config.EditorStyle
  * @see CodeBlockViewHolder 代码块视图持有者，调用此引擎进行高亮
  */
 object CodeHighlightEngine {
+
+    private val keywordPatternCache = ConcurrentHashMap<String, Regex>()
+    
+    private val functionRegex = Regex("\\b([A-Za-z_][A-Za-z0-9_]*)\\s*\\(")
+    
+    private val singleLineCommentRegex = Regex("//.*")
+    private val multiLineCommentRegex = Regex("/\\*.*?\\*/", RegexOption.DOT_MATCHES_ALL)
+    private val doubleQuoteStringRegex = Regex("\"([^\"\\\\]|\\\\.)*\"")
+    private val singleQuoteStringRegex = Regex("'([^'\\\\]|\\\\.)*'")
+    private val numberRegex = Regex("\\b\\d+(\\.\\d+)?\\b")
 
     /**
      * 代码高亮入口函数
@@ -66,95 +77,62 @@ object CodeHighlightEngine {
      * @param language 编程语言标识
      */
     fun applyHighlight(spannable: SpannableStringBuilder, language: String) {
-        // 先清理已有样式，避免重复叠加
-        val spans = spannable.getSpans(0, spannable.length, Any::class.java)
-        for (span in spans) {
-            spannable.removeSpan(span)
+        val existingSpans = spannable.getSpans(0, spannable.length, Any::class.java)
+        if (existingSpans.isNotEmpty()) {
+            spannable.removeSpan(existingSpans[0])
+            for (i in 1 until existingSpans.size) {
+                spannable.removeSpan(existingSpans[i])
+            }
         }
 
         val text = spannable.toString()
-        val lang = language.lowercase()
+        
+        val keywords = EditorConfig.LanguageKeywords.getKeywordsForLanguage(language)
 
-        // 根据语言类型选择对应的关键字列表
-        val keywords = when {
-            lang.contains("kotlin") -> EditorConfig.LanguageKeywords.KOTLIN
-            lang.contains("java") -> EditorConfig.LanguageKeywords.JAVA
-            lang.contains("js") || lang.contains("javascript") -> EditorConfig.LanguageKeywords.JAVASCRIPT
-            else -> EditorConfig.LanguageKeywords.KOTLIN // 兜底使用 Kotlin 规则
-        }
+        applyRegex(spannable, text, singleLineCommentRegex, EditorStyle.CodeColors.COMMENT)
+        applyRegex(spannable, text, multiLineCommentRegex, EditorStyle.CodeColors.COMMENT)
+        
+        applyRegex(spannable, text, doubleQuoteStringRegex, EditorStyle.CodeColors.STRING)
+        applyRegex(spannable, text, singleQuoteStringRegex, EditorStyle.CodeColors.STRING)
+        
+        applyRegex(spannable, text, numberRegex, EditorStyle.CodeColors.NUMBER)
 
-        // 注释：单行 // ... 与简单的 /* ... */（不处理嵌套）
-        applyRegex(
-            spannable,
-            Regex("//.*"),
-            EditorStyle.CodeColors.COMMENT
-        )
-        applyRegex(
-            spannable,
-            Regex("/\\*.*?\\*/", RegexOption.DOT_MATCHES_ALL),
-            EditorStyle.CodeColors.COMMENT
-        )
-
-        // 字符串："..." 或 '...'，支持转义字符
-        applyRegex(
-            spannable,
-            Regex("\"([^\"\\\\]|\\\\.)*\""),
-            EditorStyle.CodeColors.STRING
-        )
-        applyRegex(
-            spannable,
-            Regex("'([^'\\\\]|\\\\.)*'"),
-            EditorStyle.CodeColors.STRING
-        )
-
-        // 数字：整数和小数
-        applyRegex(
-            spannable,
-            Regex("\\b\\d+(\\.\\d+)?\\b"),
-            EditorStyle.CodeColors.NUMBER
-        )
-
-        // 关键字：使用正则组合匹配多个关键字
         if (keywords.isNotEmpty()) {
-            val pattern = Regex("\\b(${keywords.joinToString("|")})\\b")
-            applyRegex(
-                spannable,
-                pattern,
-                EditorStyle.CodeColors.KEYWORD,
-                bold = true
-            )
+            val langKey = language.lowercase()
+            val pattern = keywordPatternCache.getOrPut(langKey) {
+                Regex("\\b(${keywords.joinToString("|")})\\b")
+            }
+            applyRegex(spannable, text, pattern, EditorStyle.CodeColors.KEYWORD, bold = true)
         }
 
-        // 函数名：形如 name(，仅粗略匹配
-        applyFunctionHighlight(spannable)
+        applyFunctionHighlight(spannable, text)
     }
 
     /**
      * 使用正则表达式为文本应用颜色样式
      * 
      * @param spannable 目标 SpannableStringBuilder
+     * @param text 原始文本（避免重复 toString）
      * @param regex 用于匹配的正则表达式
      * @param color 前景色颜色值
      * @param bold 是否加粗，默认为 false
      */
     private fun applyRegex(
         spannable: SpannableStringBuilder,
+        text: String,
         regex: Regex,
         color: Int,
         bold: Boolean = false
     ) {
-        val text = spannable.toString()
         regex.findAll(text).forEach { match ->
             val start = match.range.first
             val end = match.range.last + 1
-            // 应用前景色
             spannable.setSpan(
                 ForegroundColorSpan(color),
                 start,
                 end,
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
             )
-            // 可选加粗
             if (bold) {
                 spannable.setSpan(
                     StyleSpan(Typeface.BOLD),
@@ -178,15 +156,13 @@ object CodeHighlightEngine {
      * - 加粗：是
      * 
      * @param spannable 目标 SpannableStringBuilder
+     * @param text 原始文本（避免重复 toString）
      */
-    private fun applyFunctionHighlight(spannable: SpannableStringBuilder) {
-        val text = spannable.toString()
-        val regex = Regex("\\b([A-Za-z_][A-Za-z0-9_]*)\\s*\\(")
-        regex.findAll(text).forEach { match ->
+    private fun applyFunctionHighlight(spannable: SpannableStringBuilder, text: String) {
+        functionRegex.findAll(text).forEach { match ->
             val group = match.groups[1] ?: return@forEach
             val start = group.range.first
             val end = group.range.last + 1
-            // 应用函数名高亮
             spannable.setSpan(
                 ForegroundColorSpan(EditorStyle.CodeColors.FUNCTION),
                 start,

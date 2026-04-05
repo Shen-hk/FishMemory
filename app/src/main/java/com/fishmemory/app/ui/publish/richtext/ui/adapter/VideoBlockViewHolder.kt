@@ -44,7 +44,7 @@ class VideoBlockViewHolder(
 
     fun bind(
         block: EditorBlock.VideoBlock,
-        playerManager: VideoPlayerManager?, // 已不再使用，仅为兼容签名
+        playerManager: VideoPlayerManager?,
         uploadManager: VideoUploadManager?,
         onDeleteRequested: ((String) -> Unit)?,
         onRetryRequested: ((String) -> Unit)?,
@@ -52,8 +52,14 @@ class VideoBlockViewHolder(
         onPlayStateChanged: ((String, EditorBlock.PlayState) -> Unit)?,
         onVideoClicked: ((String) -> Unit)?
     ) {
+        val playableUrl = block.remoteUrl ?: block.localUri ?: return
+        
+        // 从 LRU 池获取或创建播放器
+        playerManager?.attachPlayer(block.id, playerView, playableUrl)
+        exoPlayer = playerManager?.getPlayer(block.id)
+        
         // 使用 Actions 类处理视频块逻辑
-        exoPlayer = actions.bindVideo(
+        actions.bindVideo(
             root = root,
             videoContainer = videoContainer,
             ivCover = ivCover,
@@ -78,7 +84,8 @@ class VideoBlockViewHolder(
 
 
     fun clear() {
-        actions.clear(playerView, exoPlayer, ivCover)
+        // 从 LRU 池释放播放器
+        actions.clear(playerView, null, ivCover)
         exoPlayer = null
     }
 

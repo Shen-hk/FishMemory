@@ -7,11 +7,15 @@ import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup.MarginLayoutParams
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.appcompat.widget.AppCompatButton
 import androidx.core.content.ContextCompat
 import com.fishmemory.app.R
+import com.fishmemory.app.ui.publish.ai.AiAssistUiState
 import com.fishmemory.app.ui.publish.richtext.config.EditorStyle
 import com.fishmemory.app.ui.publish.richtext.ui.view.BlockEditText
 import com.fishmemory.app.ui.publish.richtext.core.model.EditorBlock
@@ -103,6 +107,92 @@ class TextBlockView @JvmOverloads constructor(
         gravity = Gravity.TOP
     }
 
+    /** 垂直承载正文行与 AI 预览区，便于在块内展示预览而不打断 RecyclerView 单块结构。 */
+    private val mainColumn: LinearLayout = LinearLayout(context).apply {
+        orientation = LinearLayout.VERTICAL
+    }
+
+    private val aiSection: LinearLayout = LinearLayout(context).apply {
+        orientation = LinearLayout.VERTICAL
+        visibility = GONE
+        setPadding(
+            EditorStyle.dpToPx(context, 12),
+            EditorStyle.dpToPx(context, 8),
+            EditorStyle.dpToPx(context, 12),
+            EditorStyle.dpToPx(context, 4)
+        )
+        background = GradientDrawable().apply {
+            setColor(Color.parseColor("#0D000000"))
+            cornerRadius = EditorStyle.dpToPx(context, 8).toFloat()
+        }
+    }
+
+    private val aiProgress: ProgressBar = ProgressBar(context).apply {
+        isIndeterminate = true
+        visibility = GONE
+    }
+
+    private val aiPreviewLabel: TextView = TextView(context).apply {
+        textSize = 12f
+        setTextColor(ContextCompat.getColor(context, R.color.gray))
+        setText(R.string.ai_polish_preview_label)
+        visibility = GONE
+    }
+
+    private val aiPreviewText: TextView = TextView(context).apply {
+        textSize = EditorStyle.TEXT_BODY.textSizeSp
+        setTextColor(ContextCompat.getColor(context, R.color.app_primary))
+        visibility = GONE
+    }
+
+    private val aiErrorText: TextView = TextView(context).apply {
+        textSize = 14f
+        setTextColor(Color.parseColor("#B00020"))
+        visibility = GONE
+    }
+
+    private val aiButtonRow: LinearLayout = LinearLayout(context).apply {
+        orientation = LinearLayout.HORIZONTAL
+        visibility = GONE
+    }
+
+    // 使用 AppCompatButton：避免在代码里用 Material attr 构造 MaterialButton 时因 Context/主题解析异常导致闪退
+    private val btnAiAccept: AppCompatButton = AppCompatButton(context).apply {
+        text = context.getString(R.string.ai_polish_accept)
+        textSize = 13f
+        visibility = GONE
+    }
+
+    private val btnAiRetry: AppCompatButton = AppCompatButton(context).apply {
+        text = context.getString(R.string.ai_polish_retry)
+        textSize = 13f
+        visibility = GONE
+    }
+
+    private val btnAiDiscard: AppCompatButton = AppCompatButton(context).apply {
+        text = context.getString(R.string.ai_polish_discard)
+        textSize = 13f
+        visibility = GONE
+    }
+
+    /** 焦点且非空、且当前无进行中的 AI 会话时展示；避免与软键盘 idle 防抖抢交互。 */
+    private val sparkleFab: TextView = TextView(context).apply {
+        text = "✨"
+        textSize = 18f
+        contentDescription = context.getString(R.string.ai_polish_sparkle_cd)
+        visibility = GONE
+        setPadding(
+            EditorStyle.dpToPx(context, 6),
+            EditorStyle.dpToPx(context, 4),
+            EditorStyle.dpToPx(context, 6),
+            EditorStyle.dpToPx(context, 4)
+        )
+        background = GradientDrawable().apply {
+            shape = GradientDrawable.OVAL
+            setColor(Color.parseColor("#E8F4FD"))
+        }
+    }
+
     private val normalTextColor: Int
     private val quoteTextColor: Int = ContextCompat.getColor(context, R.color.richtext_quote_text)
 
@@ -133,15 +223,133 @@ class TextBlockView @JvmOverloads constructor(
             )
         )
 
-        val params = LinearLayout.LayoutParams(
+        val containerLp = LinearLayout.LayoutParams(
             LayoutParams.MATCH_PARENT,
             LayoutParams.WRAP_CONTENT
         ).apply {
-            // 初始使用正文字块的间距
             topMargin = EditorStyle.dpToPx(context, EditorStyle.TEXT_BODY.blockMarginDp)
             bottomMargin = EditorStyle.dpToPx(context, EditorStyle.TEXT_BODY.blockMarginDp)
         }
-        addView(container, params)
+        mainColumn.addView(container, containerLp)
+
+        aiSection.addView(aiProgress, LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
+        aiSection.addView(aiPreviewLabel, LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
+        aiSection.addView(aiPreviewText, LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
+        aiSection.addView(aiErrorText, LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
+
+        val btnLp = LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f).apply {
+            marginEnd = EditorStyle.dpToPx(context, 4)
+        }
+        aiButtonRow.addView(btnAiAccept, LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f).apply {
+            marginEnd = EditorStyle.dpToPx(context, 4)
+        })
+        aiButtonRow.addView(btnAiRetry, btnLp)
+        aiButtonRow.addView(btnAiDiscard, LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
+        aiSection.addView(aiButtonRow, LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply {
+            topMargin = EditorStyle.dpToPx(context, 8)
+        })
+
+        mainColumn.addView(aiSection, LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
+
+        addView(
+            mainColumn,
+            FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+        )
+        addView(
+            sparkleFab,
+            FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply {
+                gravity = Gravity.BOTTOM or Gravity.END
+                marginEnd = EditorStyle.dpToPx(context, 4)
+                bottomMargin = EditorStyle.dpToPx(context, 4)
+            }
+        )
+    }
+
+    /**
+     * 只读态或解绑时关闭 AI 控件，避免复用时残留。
+     */
+    fun resetAiAssistUi() {
+        sparkleFab.visibility = GONE
+        aiSection.visibility = GONE
+        aiProgress.visibility = GONE
+        aiPreviewLabel.visibility = GONE
+        aiPreviewText.visibility = GONE
+        aiErrorText.visibility = GONE
+        aiButtonRow.visibility = GONE
+        btnAiAccept.visibility = GONE
+        btnAiRetry.visibility = GONE
+        btnAiDiscard.visibility = GONE
+    }
+
+    /**
+     * @param showSparkle 当前块获得焦点且正文非空、且 AI 为 Idle 时显示入口。
+     */
+    fun bindAiAssistUi(
+        showSparkle: Boolean,
+        state: AiAssistUiState,
+        onSparkleClick: () -> Unit,
+        onAccept: () -> Unit,
+        onRetry: () -> Unit,
+        onDiscard: () -> Unit,
+    ) {
+        sparkleFab.setOnClickListener { onSparkleClick() }
+        btnAiAccept.setOnClickListener { onAccept() }
+        btnAiRetry.setOnClickListener { onRetry() }
+        btnAiDiscard.setOnClickListener { onDiscard() }
+
+        sparkleFab.visibility = if (showSparkle) VISIBLE else GONE
+
+        when (state) {
+            is AiAssistUiState.Idle -> {
+                aiSection.visibility = GONE
+                aiProgress.visibility = GONE
+                aiPreviewLabel.visibility = GONE
+                aiPreviewText.visibility = GONE
+                aiErrorText.visibility = GONE
+                aiButtonRow.visibility = GONE
+            }
+            is AiAssistUiState.Loading -> {
+                aiSection.visibility = VISIBLE
+                aiProgress.visibility = VISIBLE
+                aiPreviewLabel.visibility = GONE
+                aiPreviewText.visibility = GONE
+                aiErrorText.visibility = GONE
+                aiButtonRow.visibility = GONE
+            }
+            is AiAssistUiState.Streaming -> {
+                aiSection.visibility = VISIBLE
+                aiProgress.visibility = GONE
+                aiPreviewLabel.visibility = VISIBLE
+                aiPreviewText.visibility = VISIBLE
+                aiPreviewText.text = state.accumulatedText
+                aiErrorText.visibility = GONE
+                aiButtonRow.visibility = GONE
+            }
+            is AiAssistUiState.Preview -> {
+                aiSection.visibility = VISIBLE
+                aiProgress.visibility = GONE
+                aiPreviewLabel.visibility = VISIBLE
+                aiPreviewText.visibility = VISIBLE
+                aiPreviewText.text = state.text
+                aiErrorText.visibility = GONE
+                aiButtonRow.visibility = VISIBLE
+                btnAiAccept.visibility = VISIBLE
+                btnAiRetry.visibility = VISIBLE
+                btnAiDiscard.visibility = VISIBLE
+            }
+            is AiAssistUiState.Error -> {
+                aiSection.visibility = VISIBLE
+                aiProgress.visibility = GONE
+                aiPreviewLabel.visibility = GONE
+                aiPreviewText.visibility = GONE
+                aiErrorText.visibility = VISIBLE
+                aiErrorText.text = state.message
+                aiButtonRow.visibility = VISIBLE
+                btnAiAccept.visibility = GONE
+                btnAiRetry.visibility = VISIBLE
+                btnAiDiscard.visibility = VISIBLE
+            }
+        }
     }
 
     /**

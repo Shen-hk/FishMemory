@@ -21,6 +21,12 @@ interface BlockInteractionListener {
     /** 获得焦点通知 */
     fun onFocusGained(blockId: String)
 
+    /**
+     * 失去焦点：用于隐藏仅 focus 时展示的控件（如 AI ✨）。
+     * 默认无实现；编辑态正文块在 Adapter 中覆盖。
+     */
+    fun onFocusLost(blockId: String) {}
+
     /** 内容变更通知 */
     fun onContentChanged(blockId: String)
 

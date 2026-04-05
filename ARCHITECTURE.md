@@ -42,8 +42,8 @@
 
 ### 发表与富文本
 
-- **富文本编辑与展示**：见 **[发表模块文档](app/src/main/java/com/fishmemory/app/ui/publish/PUBLISH_MODULE.md)**。  
-- 编辑使用 `RichEditorView` + `RichDocument`；只读展示使用 `RichContentAdapter` + ViewHolder。
+- **块式富文本编辑**：`BlockEditorRecyclerView` + `Document` / `EditorBlockList`；持久化与导出见 `BlockDocumentConverter`、草稿 JSON 等。详细链路见 **[docs/publish-richtext-interview-deep-dive.md](docs/publish-richtext-interview-deep-dive.md)** 与 **[PUBLISH_MODULE.md](app/src/main/java/com/fishmemory/app/ui/publish/PUBLISH_MODULE.md)**（后者含历史目录与项目介绍长文案）。
+- **AI 润色**：`ui/publish/ai/` + `docs/ai-polish-implementation.md`。
 
 ### 其他
 
@@ -72,7 +72,15 @@
 
 | 文档 | 说明 |
 |------|------|
-| [PUBLISH_MODULE.md](app/src/main/java/com/fishmemory/app/ui/publish/PUBLISH_MODULE.md) | 发表页与富文本编辑器（RichDocument、RichEditorView、粘贴与滚动策略）。 |
-| 本文档 ARCHITECTURE.md | 整体分层、包结构、模块入口与数据流。 |
+| [docs/README.md](docs/README.md) | **文档总索引**（建议从这里进入） |
+| [docs/richtext-editor-deep-dive.md](docs/richtext-editor-deep-dive.md) | 富文本块编辑器精读手册 |
+| [docs/publish-richtext-interview-deep-dive.md](docs/publish-richtext-interview-deep-dive.md) | 发布链路 + 面试版结论 |
+| [docs/ai-polish-implementation.md](docs/ai-polish-implementation.md) | 正文块 AI 润色（DeepSeek） |
+| [app/.../publish/PUBLISH_MODULE.md](app/src/main/java/com/fishmemory/app/ui/publish/PUBLISH_MODULE.md) | 发表模块历史说明与项目介绍文案（含目录与长文案，与 `docs` 互补） |
+| [app/.../publish/richtext/README.md](app/src/main/java/com/fishmemory/app/ui/publish/richtext/README.md) | `richtext` 包分层约定 |
+| 本文档 ARCHITECTURE.md | 整体分层、包结构、模块入口与数据流 |
 
-代码已就绪，审阅确认后可按需合入与扩展。
+### 发表与富文本（实现要点）
+
+- 编辑器容器为 **`BlockEditorRecyclerView`**（`EditorBlock` + `EditorAdapter` + `BlockEditorOperations`），不是旧文档中的泛名 `RichEditorView`。
+- 发布页在 **`PublishActivity`** 中编排：`PublishDraftCoordinator`、`PublishArticleUseCase`、媒体 Coordinator；**AI 润色**由 **`BlockAiAssistViewModel`** 独立承载，见 `docs/ai-polish-implementation.md`。

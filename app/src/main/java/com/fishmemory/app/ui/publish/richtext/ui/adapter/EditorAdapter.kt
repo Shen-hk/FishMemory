@@ -1,5 +1,7 @@
 package com.fishmemory.app.ui.publish.richtext.ui.adapter
 
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +17,7 @@ import com.fishmemory.app.ui.publish.richtext.ui.actions.ImageBlockActions
 import com.fishmemory.app.ui.publish.richtext.ui.actions.LinkUiActions
 import com.fishmemory.app.ui.publish.richtext.ui.actions.ListBlockActions
 import com.fishmemory.app.ui.publish.richtext.ui.view.TextBlockView
+import com.fishmemory.app.ui.publish.ai.AiAssistUiState
 import com.fishmemory.app.ui.publish.richtext.business.media.VideoPlayerManager
 
 /**
@@ -29,7 +32,22 @@ class EditorAdapter(
     private val listBlockActions: ListBlockActions? = null  // 注入 ListBlockActions
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
+    private val mainHandler = Handler(Looper.getMainLooper())
+
     private val isReadOnly: Boolean get() = readOnlyBlocks != null
+
+    /**
+     * bind 中 [setText] 会同步触发 TextWatcher → [onContentChanged]；若在此时 [notifyItemChanged]
+     * 会抛出 IllegalStateException（RecyclerView 正在 layout）。排到下一消息再刷新 AI 条。
+     */
+    private fun scheduleAiAssistItemRefresh(blockId: String) {
+        mainHandler.post {
+            val idx = blockList?.getBlockPosition(blockId) ?: -1
+            if (idx >= 0) {
+                notifyItemChanged(idx + 1, PAYLOAD_AI_ASSIST)
+            }
+        }
+    }
 
     fun setReadOnlyBlocks(blocks: List<EditorBlockDisplay>?) {
         readOnlyBlocks = blocks
@@ -84,6 +102,17 @@ class EditorAdapter(
 
     /** 任意编辑内容变更（标题/正文/结构块）统一回调。 */
     var onContentChanged: (() -> Unit)? = null
+
+    /** 当前聚焦的正文块 id，用于展示 ✨；与 [onFocusGained] 同步。 */
+    var focusedTextBlockId: String? = null
+
+    /** 与 ViewModel 会话 map 同步的镜像，payload 刷新时读取。 */
+    var aiAssistStates: Map<String, AiAssistUiState> = emptyMap()
+
+    var onAiSparkleClick: ((blockId: String) -> Unit)? = null
+    var onAiAccept: ((blockId: String) -> Unit)? = null
+    var onAiRetry: ((blockId: String) -> Unit)? = null
+    var onAiDiscard: ((blockId: String) -> Unit)? = null
 
     init {
         setHasStableIds(true)
@@ -228,8 +257,18 @@ class EditorAdapter(
                         this@EditorAdapter.onFocusGained?.invoke(blockId)
                     }
 
+                    override fun onFocusLost(blockId: String) {
+                        if (focusedTextBlockId != blockId) return
+                        focusedTextBlockId = null
+                        scheduleAiAssistItemRefresh(blockId)
+                    }
+
                     override fun onContentChanged(blockId: String) {
                         this@EditorAdapter.onContentChanged?.invoke()
+                        // 输入导致空/非空变化时更新 ✨；必须 post，避免 bind 内 setText 同步回调时 notify
+                        if (!isReadOnly) {
+                            scheduleAiAssistItemRefresh(blockId)
+                        }
                     }
 
                     override fun onLinkClicked(blockId: String, url: String, start: Int, end: Int) {
@@ -237,6 +276,15 @@ class EditorAdapter(
                     }
                 }
                 holder.bind(textBlock, prevIsQuote, nextIsQuote)
+                holder.bindAiAssist(
+                    block = textBlock,
+                    focusedTextBlockId = focusedTextBlockId,
+                    state = aiAssistStates[textBlock.id] ?: AiAssistUiState.Idle,
+                    onSparkleClick = { onAiSparkleClick?.invoke(textBlock.id) },
+                    onAccept = { onAiAccept?.invoke(textBlock.id) },
+                    onRetry = { onAiRetry?.invoke(textBlock.id) },
+                    onDiscard = { onAiDiscard?.invoke(textBlock.id) },
+                )
             }
             is ImageBlockViewHolder -> {
                 val imageBlock = block as? EditorBlock.ImageBlock ?: return
@@ -264,6 +312,7 @@ class EditorAdapter(
                 val codeBlock = block as? EditorBlock.CodeBlock ?: return
                 val isSelected = position == selectedCodePosition
                 codeBlock.isSelected = isSelected
+                Log.d("CodeBind", "[onBindViewHolder] position=$position, selectedCodePosition=$selectedCodePosition, isSelected=$isSelected")
                 holder.bind(
                     block = codeBlock,
                     isSelected = isSelected,
@@ -307,6 +356,33 @@ class EditorAdapter(
         }
     }
 
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int, payloads: MutableList<Any>) {
+        if (payloads.isEmpty()) {
+            onBindViewHolder(holder, position)
+            return
+        }
+        if (
+            holder is TextBlockViewHolder &&
+            !isReadOnly &&
+            position > 0 &&
+            payloads.contains(PAYLOAD_AI_ASSIST)
+        ) {
+            val textBlock = blockList!!.getBlocks().getOrNull(position - 1) as? EditorBlock.TextBlock
+                ?: return
+            holder.bindAiAssist(
+                block = textBlock,
+                focusedTextBlockId = focusedTextBlockId,
+                state = aiAssistStates[textBlock.id] ?: AiAssistUiState.Idle,
+                onSparkleClick = { onAiSparkleClick?.invoke(textBlock.id) },
+                onAccept = { onAiAccept?.invoke(textBlock.id) },
+                onRetry = { onAiRetry?.invoke(textBlock.id) },
+                onDiscard = { onAiDiscard?.invoke(textBlock.id) },
+            )
+            return
+        }
+        onBindViewHolder(holder, position)
+    }
+
     override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
         super.onViewRecycled(holder)
         if (holder is ImageBlockViewHolder) holder.clearGlide()
@@ -316,6 +392,9 @@ class EditorAdapter(
     }
 
     companion object {
+        /** 局部刷新：仅更新 AI 辅助条，避免重绑 EditText。 */
+        const val PAYLOAD_AI_ASSIST = "ai_assist"
+
         private const val VIEW_TYPE_TITLE = 0
         private const val VIEW_TYPE_TEXT = 1
         private const val VIEW_TYPE_IMAGE = 2

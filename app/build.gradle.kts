@@ -1,9 +1,18 @@
 import org.gradle.kotlin.dsl.implementation
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
+}
+
+// local.properties 中的自定义键不会自动进入 project.findProperty，需显式加载（与 sdk.dir 同文件）
+val localProperties = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) {
+        f.inputStream().use { load(it) }
+    }
 }
 
 android {
@@ -18,6 +27,13 @@ android {
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
+        val deepSeekKeyRaw = localProperties.getProperty("DEEPSEEK_API_KEY")?.trim().orEmpty()
+            .ifEmpty { (project.findProperty("DEEPSEEK_API_KEY") as? String)?.trim().orEmpty() }
+        // 转义为 Java 字符串字面量，避免引号/反斜杠打断 BuildConfig
+        val deepSeekKeyEscaped = deepSeekKeyRaw
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+        buildConfigField("String", "DEEPSEEK_API_KEY", "\"" + deepSeekKeyEscaped + "\"")
     }
 
     buildTypes {
@@ -33,6 +49,7 @@ android {
     buildFeatures {
         viewBinding = true
         compose = true
+        buildConfig = true
     }
 
     composeOptions {

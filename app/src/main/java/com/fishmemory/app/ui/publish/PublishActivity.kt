@@ -6,11 +6,21 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.fishmemory.app.core.utils.view.setStatusBarIconsBlack
+import com.fishmemory.app.R
+import com.fishmemory.app.BuildConfig
 import com.fishmemory.app.databinding.ActivityPublishBinding
+import com.fishmemory.app.ui.publish.ai.AiAssistEffect
+import com.fishmemory.app.ui.publish.ai.AiPolishStyle
+import com.fishmemory.app.ui.publish.ai.BlockAiAssistViewModel
+import com.fishmemory.app.ui.publish.ai.BlockAiAssistViewModelFactory
 import com.fishmemory.app.ui.publish.draft.PublishDraftCoordinator
 import com.fishmemory.app.ui.publish.draftlist.DraftListActivity
 import com.fishmemory.app.ui.publish.richtext.business.media.PublishMediaCoordinator
@@ -23,6 +33,7 @@ import com.fishmemory.app.ui.publish.richtext.core.model.EditorBlock
 import com.fishmemory.app.ui.publish.usecase.PublishArticleUseCase
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlin.math.max
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import java.io.File
@@ -46,6 +57,8 @@ class PublishActivity : AppCompatActivity() {
     private lateinit var videoPlayerManager: VideoPlayerManager
     private lateinit var videoUploadManager: VideoUploadManager
     private val videoScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    private lateinit var aiAssistViewModel: BlockAiAssistViewModel
 
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -109,6 +122,11 @@ class PublishActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityPublishBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        aiAssistViewModel = ViewModelProvider(
+            this,
+            BlockAiAssistViewModelFactory(application, BuildConfig.DEEPSEEK_API_KEY),
+        )[BlockAiAssistViewModel::class.java]
 
         window.setStatusBarIconsBlack()
 
@@ -215,7 +233,47 @@ class PublishActivity : AppCompatActivity() {
             mediaCoordinator.showImageBlockMenu(anchorView, blockId)
         }
 
+        aiAssistViewModel.onSessionVisualUpdate = { blockId ->
+            binding.blockEditorView.syncAiAssistStates(aiAssistViewModel.sessions.value)
+            binding.blockEditorView.notifyAiAssistForBlock(blockId)
+        }
+        binding.blockEditorView.configureAiAssistCallbacks(
+            onSparkle = { blockId -> showAiPolishStyleDialog(blockId) },
+            onAccept = { blockId -> aiAssistViewModel.accept(blockId) },
+            onRetry = { blockId -> aiAssistViewModel.retry(binding.blockEditorView.blockList, blockId) },
+            onDiscard = { blockId -> aiAssistViewModel.discard(blockId) },
+        )
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                aiAssistViewModel.effects.collect { effect ->
+                    when (effect) {
+                        is AiAssistEffect.ApplyAcceptedText ->
+                            binding.blockEditorView.applyAiPolishToTextBlock(effect.blockId, effect.plainText)
+                    }
+                }
+            }
+        }
+
         draftCoordinator.attachAndStart()
+    }
+
+    private fun showAiPolishStyleDialog(blockId: String) {
+        val labels = arrayOf(
+            getString(R.string.ai_polish_style_formal),
+            getString(R.string.ai_polish_style_shorter),
+            getString(R.string.ai_polish_style_expand),
+        )
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.ai_polish_sheet_title)
+            .setItems(labels) { _, which ->
+                val style = when (which) {
+                    0 -> AiPolishStyle.MORE_FORMAL
+                    1 -> AiPolishStyle.SHORTER
+                    else -> AiPolishStyle.EXPAND
+                }
+                aiAssistViewModel.startPolish(binding.blockEditorView.blockList, blockId, style)
+            }
+            .show()
     }
 
     private fun buildCurrentDocument(): Document {
@@ -286,6 +344,7 @@ class PublishActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        aiAssistViewModel.onSessionVisualUpdate = null
         if (::videoPlayerManager.isInitialized) {
             videoPlayerManager.releaseAll()
         }

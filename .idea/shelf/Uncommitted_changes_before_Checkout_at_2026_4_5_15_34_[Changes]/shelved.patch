@@ -1,0 +1,21 @@
+Index: README.md
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># \uD83D\uDC1F FishMemory \r\n\r\n![Kotlin](https://img.shields.io/badge/Kotlin-1.9+-blue.svg?logo=kotlin)\r\n![Architecture](https://img.shields.io/badge/Architecture-MVVM%20%7C%20Clean-success.svg)\r\n![License](https://img.shields.io/badge/License-MIT-green.svg)\r\n\r\n**FishMemory** 是一款 Android 端资讯阅读与内容发布应用。其核心亮点是内置了一个**纯原生的块式富文本编辑器**（非 WebView 实现），并深度集成了 DeepSeek AI 提供流式写作辅助。项目采用 Clean Architecture 与模块化设计，具备良好的可扩展性。\r\n\r\n## \uD83D\uDEE0 技术栈\r\n\r\n- **开发语言**: Kotlin (Coroutines & Flow)\r\n- **架构设计**: MVVM + Repository (Clean Architecture)\r\n- **UI 框架**: ViewBinding, RecyclerView (复杂多类型列表处理)\r\n- **本地存储**: Room Database\r\n- **网络通信**: Retrofit + OkHttp + Server-Sent Events (SSE)\r\n- **多媒体**: Glide (图片加载), uCrop (裁剪), Media3 ExoPlayer (视频播放)\r\n\r\n## ✨ 核心功能\r\n\r\n### ✍\uFE0F 原生块式富文本编辑器 (核心)\r\n- **多维度块类型**: 支持标题、正文、加粗/下划线/删除线、引用、列表（有序/无序）、**代码块（支持语法高亮）**、图片、视频、链接卡片及分割线。\r\n- **极致交互体验**: \r\n  - 基于 RecyclerView 实现块级独立编辑与跨块焦点无缝切换。\r\n  - 支持图片的动态裁剪、替换与大图预览。\r\n  - 完善的软键盘适配与 IME (输入法) 状态监听。\r\n\r\n### \uD83E\uDD16 AI 智能写作辅助\r\n- **流式响应**: 深度集成 DeepSeek 接口，基于 SSE 实现“打字机”式的流式文本输出。\r\n- **多模式润色**: 提供“更正式”、“更简短”、“扩写”等多种 AI 交互指令。\r\n- **无损反悔机制**: 提供实时预览态（Preview），支持一键替换、重试或放弃，保障用户原稿数据安全。\r\n\r\n### \uD83D\uDCBE 健壮的草稿与数据管理\r\n- **自动防丢**: 监听输入状态，内容变更后自动触发延迟防抖保存。\r\n- **增量同步**: 基于 Room 数据库的本地增量更新与时间戳冲突处理。\r\n\r\n### \uD83D\uDCD6 资讯浏览与互动\r\n- 首页分类导航与信息流瀑布展示。\r\n- 高性能的文章详情页（复用富文本渲染引擎）。\r\n- 本地状态同步的点赞与收藏功能。\r\n\r\n## \uD83C\uDFD7 项目架构\r\n项目遵循 Clean Architecture 原则，将 UI 平台依赖与核心业务逻辑严格分离：\r\napp/src/main/java/com/fishmemory/app/\r\n├── core/              # 核心层：基础工具、网络配置、全局扩展\r\n├── data/              # 数据层：Repository 实现、Room 数据库、Model 映射\r\n├── ui/                # UI 层：Activity/Fragment、ViewModel\r\n│   ├── home/          # 首页与信息流\r\n│   ├── articledetail/ # 文章详情模块\r\n│   ├── publish/       # 发布模块（核心）\r\n│   │   ├── richtext/  # ➡\uFE0F 富文本 SDK 独立层\r\n│   │   │   ├── core/      # Block 模型、正则解析、Span 样式应用\r\n│   │   │   ├── ui/        # ViewHolder 动态绑定、Adapter 控制\r\n│   │   │   ├── business/  # 媒体协调器、视频/图片业务逻辑\r\n│   │   │   └── config/    # 编辑器全局配置\r\n│   │   ├── ai/        # AI 润色状态机管理 (ViewModel)\r\n│   │   └── draft/     # 草稿箱侧滑栏/列表\r\n│   └── mine/          # 个人中心模块\r\n└── MainActivity.kt    # 主路由入口\r\n## \uD83D\uDCF8 效果展示\r\n### AI 智能润色\r\n<img src=\"docs/gif/ai_polish.gif\" width=\"400\" />\r\n\r\n### 代码块展示\r\n<img src=\"docs/gif/代码块.gif\" width=\"400\" />\r\n\r\n### 本地文件管理\r\n<img src=\"docs/gif/本地文章管理.gif\" width=\"400\" />\r\n\r\n### 草稿箱交互\r\n<img src=\"docs/gif/草稿箱.gif\" width=\"400\" />\r\n\r\n### 超链接块\r\n<img src=\"docs/gif/超链接卡片.gif\" width=\"400\" />\r\n## \uD83D\uDCC5 待办事项 (TODO)\r\n[ ] 接入云端同步机制与账号体系\r\n\r\n[ ] 评论系统与消息互动\r\n\r\n[ ] 全文检索与标签过滤\r\n\r\n[ ] 暗黑模式 (Dark Mode) 深度适配\r\n\r\n[ ] 探索更多 AI 场景（全文摘要生成、上下文续写）\r\n\r\n## \uD83D\uDCC4 License\r\n本项目基于 MIT License 开源。\r\n
+===================================================================
+diff --git a/README.md b/README.md
+--- a/README.md	(revision a1ee2ec591d76cc23e1262918854f0ac525f0a4b)
++++ b/README.md	(date 1775373817894)
+@@ -61,10 +61,10 @@
+ <img src="docs/gif/ai_polish.gif" width="400" />
+ 
+ ### 代码块展示
+-<img src="docs/gif/代码块.gif" width="400" />
++<img src="docs/gif/code.gif" width="400" />
+ 
+ ### 本地文件管理
+-<img src="docs/gif/本地文章管理.gif" width="400" />
++<img src="docs/gif/localmanage.gif" width="400" />
+ 
+ ### 草稿箱交互
+ <img src="docs/gif/草稿箱.gif" width="400" />

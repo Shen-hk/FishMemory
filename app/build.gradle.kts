@@ -73,6 +73,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":richtext-editor"))
+
     // AndroidX Core（统一使用 libs 引用）
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -114,6 +116,7 @@ dependencies {
     // View 层：Material、Navigation、RecyclerView、SwipeRefresh
     implementation(libs.material)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.recyclerview)
     implementation(libs.androidx.swiperefreshlayout)
     implementation(libs.androidx.navigation.fragment)

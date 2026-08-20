@@ -5,8 +5,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.fishmemory.app.BuildConfig
 import com.fishmemory.app.R
+import com.fishmemory.app.ui.publish.richtext.api.AiAssistProvider
 import com.fishmemory.app.ui.publish.richtext.core.model.EditorBlockList
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -25,8 +25,7 @@ import kotlinx.coroutines.launch
  */
 class BlockAiAssistViewModel(
     application: Application,
-    apiKey: String,
-    private val streamClient: DeepSeekChatStreamClient = DeepSeekChatStreamClient(apiKey),
+    private val aiAssistProvider: AiAssistProvider,
 ) : AndroidViewModel(application) {
 
     /** 由 Activity 设置：某 block 的 AI UI 变化时刷新对应 ViewHolder。 */
@@ -45,25 +44,12 @@ class BlockAiAssistViewModel(
     fun startPolish(blockList: EditorBlockList, blockId: String, style: AiPolishStyle) {
         // 先于网络校验写入，便于缺 Key 时 Retry 仍能复现同一润色意图
         lastStyleByBlock[blockId] = style
-        if (BuildConfig.DEEPSEEK_API_KEY.isBlank()) {
-            putSession(
-                blockId,
-                AiAssistUiState.Error(
-                    style = style,
-                    message = getApplication<Application>().getString(R.string.ai_polish_missing_api_key),
-                ),
-            )
-            return
-        }
-        val messages = AiPromptBuilder.buildMessages(blockList, blockId, style) ?: return
         streamJobs[blockId]?.cancel()
         streamJobs[blockId] = viewModelScope.launch {
             putSession(blockId, AiAssistUiState.Loading(style))
             var accumulated = ""
             try {
-                streamClient.streamChat(
-                    listOf("system" to messages.first, "user" to messages.second),
-                ).collect { delta ->
+                aiAssistProvider.polish(blockList, blockId, style).collect { delta ->
                     accumulated += delta
                     putSession(
                         blockId,
@@ -76,6 +62,14 @@ class BlockAiAssistViewModel(
                 )
             } catch (_: CancellationException) {
                 putSession(blockId, AiAssistUiState.Idle)
+            } catch (_: AiAssistProvider.MissingCredentialsException) {
+                putSession(
+                    blockId,
+                    AiAssistUiState.Error(
+                        style = style,
+                        message = getApplication<Application>().getString(R.string.ai_polish_missing_api_key),
+                    ),
+                )
             } catch (e: Exception) {
                 putSession(
                     blockId,
@@ -141,11 +135,11 @@ class BlockAiAssistViewModel(
 
 class BlockAiAssistViewModelFactory(
     private val application: Application,
-    private val apiKey: String,
+    private val aiAssistProvider: AiAssistProvider,
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return BlockAiAssistViewModel(application, apiKey) as T
+        return BlockAiAssistViewModel(application, aiAssistProvider) as T
     }
 }
 

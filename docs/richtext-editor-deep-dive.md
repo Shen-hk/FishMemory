@@ -25,7 +25,7 @@
 
 ## 2. 总体架构地图：先看全局，再钻细节
 
-以 `app/src/main/java/com/fishmemory/app/ui/publish/richtext` 为中心，可以按六层理解：
+以 `richtext-editor/src/main/java/com/fishmemory/app/ui/publish/richtext` 为中心，可以按六层理解：
 
 1. **模型层（Model）**：定义文档和块结构  
    - `core/model/Document.kt`  

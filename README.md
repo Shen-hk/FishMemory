@@ -55,15 +55,16 @@ app/src/main/java/com/fishmemory/app/
 │   ├── home/                # 首页与信息流
 │   ├── articledetail/       # 文章详情模块
 │   ├── publish/             # 发布模块 (核心)
-│   │   ├── richtext/        # ➡️ 独立富文本 SDK 层
-│   │   │   ├── core/        # Block 模型、正则解析、Span 应用
-│   │   │   ├── ui/          # ViewHolder 动态绑定、Adapter 控制
-│   │   │   ├── business/    # 媒体协调器、视频/图片业务逻辑
-│   │   │   └── config/      # 编辑器全局配置
 │   │   ├── ai/              # AI 润色状态机管理
 │   │   └── draft/           # 草稿箱侧滑栏与逻辑
 │   └── mine/                # 个人中心模块
 └── MainActivity.kt          # 主路由入口
+
+richtext-editor/             # ➡️ Android Library：原生块式富文本编辑器 SDK
+├── core/                    # Block 模型、JSON 转换、Span 解析与应用
+├── ui/                      # RecyclerView 容器、Adapter、ViewHolder
+├── business/                # 焦点选区、格式化、媒体、链接等编辑器编排
+└── config/                  # 编辑器样式与行为配置
 ```
 ## 📸 效果展示
 <table align="center" width="100%">
@@ -112,7 +113,7 @@ app/src/main/java/com/fishmemory/app/
 
 - [ ] 暗黑模式 (Dark Mode) 深度适配
       
-- [ ] sdk化编辑器
+- [x] sdk化编辑器（阶段 1：已抽离为 `:richtext-editor` Android Library）
 
 - [ ] 探索更多 AI 场景（全文摘要生成、上下文续写）
 

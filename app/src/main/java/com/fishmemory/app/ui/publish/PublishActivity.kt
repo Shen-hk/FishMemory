@@ -3,6 +3,7 @@ package com.fishmemory.app.ui.publish
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -21,12 +22,14 @@ import com.fishmemory.app.ui.publish.ai.AiAssistEffect
 import com.fishmemory.app.ui.publish.ai.AiPolishStyle
 import com.fishmemory.app.ui.publish.ai.BlockAiAssistViewModel
 import com.fishmemory.app.ui.publish.ai.BlockAiAssistViewModelFactory
+import com.fishmemory.app.ui.publish.ai.DeepSeekAiAssistProvider
 import com.fishmemory.app.ui.publish.draft.PublishDraftCoordinator
 import com.fishmemory.app.ui.publish.draftlist.DraftListActivity
 import com.fishmemory.app.ui.publish.richtext.business.media.PublishMediaCoordinator
 import com.fishmemory.app.ui.publish.richtext.business.media.VideoPlayerManager
 import com.fishmemory.app.ui.publish.richtext.business.media.VideoUploadManager
 import com.fishmemory.app.ui.publish.richtext.business.media.VidepPermissionHandler
+import com.fishmemory.app.ui.publish.richtext.api.EditorCallback
 import com.fishmemory.app.ui.publish.richtext.core.engine.span.EditorSpanApplier
 import com.fishmemory.app.ui.publish.richtext.core.model.Document
 import com.fishmemory.app.ui.publish.richtext.core.model.EditorBlock
@@ -125,7 +128,10 @@ class PublishActivity : AppCompatActivity() {
 
         aiAssistViewModel = ViewModelProvider(
             this,
-            BlockAiAssistViewModelFactory(application, BuildConfig.DEEPSEEK_API_KEY),
+            BlockAiAssistViewModelFactory(
+                application,
+                DeepSeekAiAssistProvider(BuildConfig.DEEPSEEK_API_KEY),
+            ),
         )[BlockAiAssistViewModel::class.java]
 
         window.setStatusBarIconsBlack()
@@ -149,7 +155,7 @@ class PublishActivity : AppCompatActivity() {
             activity = this,
             editor = binding.blockEditorView,
             videoScope = videoScope,
-            getVideoUploadManager = { videoUploadManager },
+            getVideoUploader = { videoUploadManager },
             permissionHandler = permissionHandler,
             requestImageReadPermissionLauncher = requestPermissionLauncher,
             requestCameraPermissionLauncher = requestCameraPermissionLauncher,
@@ -225,24 +231,39 @@ class PublishActivity : AppCompatActivity() {
             pickDraftLauncher.launch(DraftListActivity.createIntent(this))
         }
 
-        binding.blockEditorView.setOnImageBlockPreviewRequested { url -> mediaCoordinator.showImagePreview(url) }
-        binding.blockEditorView.setOnImageBlockReplaceRequested { blockId ->
-            mediaCoordinator.startReplaceImageFlow(blockId)
-        }
-        binding.blockEditorView.setOnImageBlockMenuRequested { anchorView, blockId ->
-            mediaCoordinator.showImageBlockMenu(anchorView, blockId)
-        }
-
         aiAssistViewModel.onSessionVisualUpdate = { blockId ->
             binding.blockEditorView.syncAiAssistStates(aiAssistViewModel.sessions.value)
             binding.blockEditorView.notifyAiAssistForBlock(blockId)
         }
-        binding.blockEditorView.configureAiAssistCallbacks(
-            onSparkle = { blockId -> showAiPolishStyleDialog(blockId) },
-            onAccept = { blockId -> aiAssistViewModel.accept(blockId) },
-            onRetry = { blockId -> aiAssistViewModel.retry(binding.blockEditorView.blockList, blockId) },
-            onDiscard = { blockId -> aiAssistViewModel.discard(blockId) },
-        )
+        binding.blockEditorView.setEditorCallback(object : EditorCallback {
+            override fun onImagePreviewRequested(url: String) {
+                mediaCoordinator.showImagePreview(url)
+            }
+
+            override fun onImageReplaceRequested(blockId: String) {
+                mediaCoordinator.startReplaceImageFlow(blockId)
+            }
+
+            override fun onImageMenuRequested(anchorView: View, blockId: String) {
+                mediaCoordinator.showImageBlockMenu(anchorView, blockId)
+            }
+
+            override fun onAiPolishRequested(blockId: String) {
+                showAiPolishStyleDialog(blockId)
+            }
+
+            override fun onAiPreviewAccepted(blockId: String) {
+                aiAssistViewModel.accept(blockId)
+            }
+
+            override fun onAiRetryRequested(blockId: String) {
+                aiAssistViewModel.retry(binding.blockEditorView.blockList, blockId)
+            }
+
+            override fun onAiPreviewDiscarded(blockId: String) {
+                aiAssistViewModel.discard(blockId)
+            }
+        })
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 aiAssistViewModel.effects.collect { effect ->
@@ -277,16 +298,14 @@ class PublishActivity : AppCompatActivity() {
     }
 
     private fun buildCurrentDocument(): Document {
-        val title = binding.blockEditorView.getTitleText()
-        Log.d("TitleDebug", "[buildCurrentDocument] title=[$title]")
-        val blocks = binding.blockEditorView.getBlocks()
-        Log.d("TitleDebug", "[buildCurrentDocument] blocks count=${blocks.size}")
-        return Document(title = title, blocks = blocks)
+        val document = binding.blockEditorView.getDocument()
+        Log.d("TitleDebug", "[buildCurrentDocument] title=[${document.title}]")
+        Log.d("TitleDebug", "[buildCurrentDocument] blocks count=${document.blocks.size}")
+        return document
     }
 
     private fun renderDocument(document: Document) {
-        binding.blockEditorView.setTitleText(document.title)
-        binding.blockEditorView.setBlocks(document.blocks)
+        binding.blockEditorView.setDocument(document)
     }
 
     /** 系统分享导出 JSON；需 Activity 以启动 Chooser 与授权读 URI。 */

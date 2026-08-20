@@ -8,7 +8,7 @@ import com.fishmemory.app.data.local.rooms.AppDatabase
 import com.fishmemory.app.data.local.rooms.entity.LocalArticleEntity
 import com.fishmemory.app.ui.publish.richtext.core.model.Document
 import com.fishmemory.app.ui.publish.richtext.core.model.EditorBlockEntity
-import com.fishmemory.app.ui.publish.richtext.core.converter.StandardJsonExporter
+import com.fishmemory.app.ui.publish.richtext.api.RichTextDocumentCodec
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -35,7 +35,7 @@ class PublishArticleUseCase(
      */
     fun execute(document: Document): Outcome {
         return try {
-            val json = StandardJsonExporter.toStandardJson(document)
+            val json = RichTextDocumentCodec.exportStandardJson(document)
             Log.d(TAG, "Standard JSON exported, length=${json.length}")
             val (summary, coverUrl) = extractSummaryAndCover(document)
             val localId = "local_${System.currentTimeMillis()}"

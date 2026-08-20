@@ -44,14 +44,6 @@
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="stateHidden"/>
 
-        <activity
-            android:name=".ui.publish.richtext.business.media.VideoPreviewActivity"
-            android:screenOrientation="sensorLandscape"
-            android:theme="@style/Theme.FishMemory" />
-
-
-
-
         <!-- XML版本文章详情页 -->
         <activity
             android:name=".ui.articledetail.ArticleDetailActivity"

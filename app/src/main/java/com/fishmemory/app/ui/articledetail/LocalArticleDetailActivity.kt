@@ -7,13 +7,9 @@ import android.view.ViewTreeObserver
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.fishmemory.app.data.local.rooms.AppDatabase
 import com.fishmemory.app.databinding.ActivityLocalArticleDetailBinding
-import com.fishmemory.app.ui.publish.richtext.core.model.EditorBlockDisplay
-import com.fishmemory.app.ui.publish.richtext.ui.adapter.EditorAdapter
-import com.fishmemory.app.ui.publish.richtext.core.converter.StandardBlockToDisplay
-import com.fishmemory.app.ui.publish.richtext.core.converter.StandardJsonParser
+import com.fishmemory.app.ui.publish.richtext.api.ReadOnlyRichTextRenderer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -28,10 +24,7 @@ import java.util.Locale
 class LocalArticleDetailActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLocalArticleDetailBinding
-    private val blockAdapter = EditorAdapter(readOnlyBlocks = emptyList())
-    
-    // 缓存当前展示的图片块 URL，用于预览
-    private val imageBlockUrls = mutableMapOf<String, String>()
+    private lateinit var blockRenderer: ReadOnlyRichTextRenderer
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,17 +42,8 @@ class LocalArticleDetailActivity : AppCompatActivity() {
         setupScrollAnimation()
         setupBottomBarClicks()
 
-        binding.recyclerBlocks.layoutManager = LinearLayoutManager(this).apply { isAutoMeasureEnabled = true }
-        binding.recyclerBlocks.adapter = blockAdapter
-        binding.recyclerBlocks.setHasFixedSize(false)
-        binding.recyclerBlocks.isFocusable = false
-        
-        // 设置图片预览回调
-        blockAdapter.onImageBlockPreviewRequested = { blockId ->
-            val imageUrl = imageBlockUrls[blockId]
-            if (!imageUrl.isNullOrBlank()) {
-                showImagePreview(imageUrl)
-            }
+        blockRenderer = ReadOnlyRichTextRenderer(binding.recyclerBlocks).apply {
+            onImagePreviewRequested = { imageUrl -> showImagePreview(imageUrl) }
         }
 
         binding.scrollView.scrollTo(0, 0)
@@ -77,22 +61,7 @@ class LocalArticleDetailActivity : AppCompatActivity() {
             binding.tvTitle.text = entity.title
             binding.tvMeta.text = "${entity.authorName} · ${formatTime(entity.publishTimeMs)}"
             binding.tvAuthorName.text = entity.authorName
-            val doc = StandardJsonParser.parse(entity.blocksJson)
-            val displayList = if (doc != null && doc.blocks.isNotEmpty()) {
-                StandardBlockToDisplay.toDisplayList(doc.blocks)
-            } else {
-                emptyList()
-            }
-            blockAdapter.setReadOnlyBlocks(displayList)
-            
-            // 缓存所有图片块的 URL
-            imageBlockUrls.clear()
-            displayList.filterIsInstance<EditorBlockDisplay.Image>()
-                .forEach { 
-                    if (!it.url.isNullOrBlank()) {
-                        imageBlockUrls[it.id] = it.url
-                    }
-                }
+            blockRenderer.renderStandardJson(entity.blocksJson)
 
             // 先抢焦点，避免子 View 获得焦点后系统自动滚到底部
             binding.scrollView.requestFocus()
@@ -103,13 +72,12 @@ class LocalArticleDetailActivity : AppCompatActivity() {
 
     /** 在 layout/draw 就绪后滚到顶部；并用短延迟再滚一次，覆盖后续被系统或焦点带到底部的情况 */
     private fun scrollToTopOnceReady() {
-        binding.recyclerBlocks.scrollToPosition(0)
+        blockRenderer.scrollToTop()
         binding.scrollView.scrollTo(0, 0)
 
         val scrollView = binding.scrollView
-        val recycler = binding.recyclerBlocks
         val runScroll = Runnable {
-            recycler.scrollToPosition(0)
+            blockRenderer.scrollToTop()
             scrollView.scrollTo(0, 0)
             scrollView.requestFocus()
         }
@@ -181,14 +149,8 @@ class LocalArticleDetailActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        (binding.recyclerBlocks.adapter as? EditorAdapter)?.let { adapter ->
-            val recyclerView = binding.recyclerBlocks
-            for (i in 0 until recyclerView.childCount) {
-                val viewHolder = recyclerView.getChildViewHolder(recyclerView.getChildAt(i))
-                if (viewHolder is com.fishmemory.app.ui.publish.richtext.ui.adapter.VideoBlockViewHolder) {
-                    viewHolder.pausePlayback()
-                }
-            }
+        if (::blockRenderer.isInitialized) {
+            blockRenderer.pauseVisibleVideoPlayback()
         }
     }
 

@@ -25,6 +25,7 @@ material3Android = "1.4.0"
 
 material3 = "1.4.0"
 appcompat = "1.7.1"
+constraintlayout = "2.2.1"
 recyclerview = "1.4.0"
 swiperefreshlayout = "1.1.0"
 navigationFragment = "2.9.6"
@@ -86,6 +87,7 @@ compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
 androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
 androidx-navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment", version.ref = "navigationFragment" }
@@ -120,5 +122,6 @@ androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.re
 
 [plugins]
 android-application = { id = "com.android.application", version = "8.13.2" }
+android-library = { id = "com.android.library", version = "8.13.2" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version = "1.9.23-1.0.20" }

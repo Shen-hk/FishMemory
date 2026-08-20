@@ -18,3 +18,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "FishMemory"
 include(":app")
+include(":richtext-editor")

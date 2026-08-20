@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ai_polish_sparkle_cd">AI 润色</string>
+    <string name="ai_polish_accept">替换</string>
+    <string name="ai_polish_retry">重试</string>
+    <string name="ai_polish_discard">放弃</string>
+    <string name="ai_polish_preview_label">预览</string>
+</resources>
